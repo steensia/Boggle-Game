@@ -35,8 +35,78 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
+
+        private String formula;
+
+
         public Formula(String formula)
         {
+            // Patterns for individual tokens.
+            // NOTE:  These patterns are designed to be used to create a pattern to split a string into tokens.
+            // For example, the opPattern will match any string that contains an operator symbol, such as
+            // "abc+def".  If you want to use one of these patterns to match an entire string (e.g., make it so
+            // the opPattern will match "+" but not "abc+def", you need to add ^ to the beginning of the pattern
+            // and $ to the end (e.g., opPattern would need to be @"^[\+\-*/]$".)
+            String lpPattern = @"\(";
+            String rpPattern = @"\)";
+            String opPattern = @"[\+\-*/]";
+            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+
+            // PLEASE NOTE:  I have added white space to this regex to make it more readable.
+            // When the regex is used, it is necessary to include a parameter that says
+            // embedded white space should be ignored.  See below for an example of this.
+            String doublePattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?";
+            String spacePattern = @"\s+";
+
+            // Overall pattern.  It contains embedded white space that must be ignored when
+            // it is used.  See below for an example of this.  This pattern is useful for 
+            // splitting a string into tokens.
+            String splittingPattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+                                            lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
+
+
+            Boolean shouldBeNumber = true;
+            Boolean invalid = false;
+            int numTokens = 0, numLp = 0, numRp = 0;
+            IEnumerable<string> tokens = GetTokens(formula);
+           
+
+            foreach(String s in tokens)
+            {
+
+                if (shouldBeNumber)
+                {
+                    if(Regex.IsMatch(s, varPattern+"|"+doublePattern))
+                    {
+                        shouldBeNumber = false;
+                    }
+                    else if (Regex.IsMatch(s, lpPattern))
+                    {
+                        numRp++;
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("fail");
+                    }
+                }
+                else
+                {
+                    if(Regex.IsMatch(s, opPattern))
+                    {
+                        shouldBeNumber = true;
+                    }
+                    else if(Regex.IsMatch(s, rpPattern))
+                    {
+                        numLp++;
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("fail");
+                    }
+                }
+                this.formula += s;
+            }
+            if (numRp != numLp) throw new FormulaFormatException("Parethisies miss match");
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The

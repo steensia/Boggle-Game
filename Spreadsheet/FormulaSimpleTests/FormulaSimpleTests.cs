@@ -19,6 +19,7 @@ namespace FormulaTestCases
         /// This tests that a syntactically incorrect parameter to Formula results
         /// in a FormulaFormatException.
         /// </summary>
+        /// 
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct1()
@@ -33,7 +34,7 @@ namespace FormulaTestCases
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct2()
         {
-            Formula f = new Formula("2++3");
+            Formula f = new Formula("3++3");
         }
 
         /// <summary>
