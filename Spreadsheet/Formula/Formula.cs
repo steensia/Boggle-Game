@@ -1,6 +1,7 @@
 ﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -35,6 +36,7 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
+        ArrayList formula;
         public Formula(String formula)
         {
             String lpPattern = @"^\($";
@@ -49,41 +51,48 @@ namespace Formulas
             String spacePattern = @"^\s+$";
 
             IEnumerable<string> tokens = GetTokens(formula);
+            this.formula = new ArrayList();
             int lpCount = 0, rpCount = 0;
             Boolean shouldBeNumber = true;
+
             foreach (String s in tokens)
             {
-                if (shouldBeNumber)
+                if (!Regex.IsMatch(s, spacePattern))
                 {
-                    if(Regex.IsMatch(s,varPattern+"|"+doublePattern))
+                    if (shouldBeNumber)
                     {
-                        shouldBeNumber = false;
-                    }
-                    else if(Regex.IsMatch(s,lpPattern))
-                    {
-                        lpCount++;
+                        if (Regex.IsMatch(s, varPattern + "|" + doublePattern))
+                        {
+                            shouldBeNumber = false;
+                        }
+                        else if (Regex.IsMatch(s, lpPattern))
+                        {
+                            lpCount++;
+                        }
+                        else
+                        {
+                            throw new FormulaFormatException("Invalid token:" + s);
+                        }
                     }
                     else
                     {
-                        throw new FormulaFormatException("Invalid token:"+s);
+                        if (Regex.IsMatch(s, opPattern))
+                        {
+                            shouldBeNumber = true;
+                        }
+                        else if (Regex.IsMatch(s, rpPattern))
+                        {
+                            rpCount++;
+                        }
+                        else
+                        {
+                            throw new FormulaFormatException("Invalid token:" + s);
+                        }
                     }
-
-                }
-                else
-                {
-                    if(Regex.IsMatch(s, opPattern))
-                    {
-                        shouldBeNumber = true;
-                    }
-                    else if(Regex.IsMatch(s, rpPattern))
-                    {
-                        rpCount++;                    }
-                    else
-                    {
-                        throw new FormulaFormatException("Invalid token:" + s);
-                    }
+                    this.formula.Add(s);
                 }
             }
+            if(lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
