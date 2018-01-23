@@ -37,6 +37,53 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            String lpPattern = @"^\($";
+            String rpPattern = @"^\)$";
+
+            String opPattern = @"^[\+\-*/]$";
+
+            String varPattern = @"^[a-zA-Z][0-9a-zA-Z]*$";
+
+            String doublePattern = @"^(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?$";
+
+            String spacePattern = @"^\s+$";
+
+            IEnumerable<string> tokens = GetTokens(formula);
+            int lpCount = 0, rpCount = 0;
+            Boolean shouldBeNumber = true;
+            foreach (String s in tokens)
+            {
+                if (shouldBeNumber)
+                {
+                    if(Regex.IsMatch(s,varPattern+"|"+doublePattern))
+                    {
+                        shouldBeNumber = false;
+                    }
+                    else if(Regex.IsMatch(s,lpPattern))
+                    {
+                        lpCount++;
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("Invalid token:"+s);
+                    }
+
+                }
+                else
+                {
+                    if(Regex.IsMatch(s, opPattern))
+                    {
+                        shouldBeNumber = true;
+                    }
+                    else if(Regex.IsMatch(s, rpPattern))
+                    {
+                        rpCount++;                    }
+                    else
+                    {
+                        throw new FormulaFormatException("Invalid token:" + s);
+                    }
+                }
+            }
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
