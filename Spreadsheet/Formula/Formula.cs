@@ -105,9 +105,11 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            for(int i = 0 ; i < formula.Count ;i++) formula[i] = lookup((String)formula[i]);
+            for(int i = 0 ; i < formula.Count ;i++) formula[i] = lookup(""+formula[i]);
 
-            return 0;
+            double temp = 0.0;
+            double.TryParse(Evaluate(formula), out temp);
+            return temp;
         }
 
         private string Evaluate(ArrayList inFormula)
@@ -117,19 +119,19 @@ namespace Formulas
             int lpCount = 0, rpCount = 0;
             ArrayList temp = new ArrayList();
 
-            foreach (String s in inFormula)
+            for(int i = 0; i < inFormula.Count;i++)
             {  
-                if (s.Equals("("))
+                if ("(".Equals(inFormula[i]))
                     lpCount++;
-                if (s.Equals(")"))
+                if (")".Equals(inFormula[i]))
                     rpCount++;
                 if (lpCount > 0)
                 {
-                    temp.Add(s);
+                    temp.Add(inFormula[i]);
                 }
                 else
                 {
-                    outFormula.Add(s);
+                    outFormula.Add(inFormula[i]);
                 }
                 if (lpCount == rpCount)
                 {
@@ -142,39 +144,60 @@ namespace Formulas
             }
 
             inFormula = new ArrayList();
-            String numA;
+            double numA = 0.0;
+
             for (int i = 0; i < outFormula.Count; i++)
             {
 
                 if (i % 2 == 0)
                 {
-                    numA = (String)outFormula[i];
+                    numA = (double)outFormula[i];
                 }
                 else
                 {
                     if (outFormula[i].Equals("*"))
                     {
-                      
+
+                        outFormula[i + 1] = (numA * (double)outFormula[i]);
                     }
                     else if (outFormula[i].Equals("/"))
                     {
-
+                        outFormula[i + 1] = (numA / (double)outFormula[i]);
                     }
                     else
                     {
-
+                        inFormula.Add(numA);
+                        inFormula.Add(outFormula[i]);
                     }
                 }         
             }
 
             outFormula = new ArrayList();
+            numA = 0.0;
+            double outD = 0;
 
-            for (int i = 0; i < outFormula.Count; i++)
+            for (int i = 0; i < inFormula.Count; i++)
             {
 
+                if (i % 2 == 0)
+                {
+                    numA = (double)inFormula[i];
+                }
+                else
+                {
+                    if (inFormula[i].Equals("+"))
+                    {
+
+                        inFormula[i + 1] = (numA + (double)inFormula[i]);
+                    }
+                    else if (outFormula[i].Equals("-"))
+                    {
+                        inFormula[i + 1] = (numA - (double)inFormula[i]);
+                    }
+                }
             }
 
-            return "";
+            return (String)inFormula[inFormula.Count-1];
         }
 
         /// <summary>
