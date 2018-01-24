@@ -105,7 +105,76 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            for(int i = 0 ; i < formula.Count ;i++) formula[i] = lookup((String)formula[i]);
+
             return 0;
+        }
+
+        private string Evaluate(ArrayList inFormula)
+        {
+
+            ArrayList outFormula = new ArrayList();
+            int lpCount = 0, rpCount = 0;
+            ArrayList temp = new ArrayList();
+
+            foreach (String s in inFormula)
+            {  
+                if (s.Equals("("))
+                    lpCount++;
+                if (s.Equals(")"))
+                    rpCount++;
+                if (lpCount > 0)
+                {
+                    temp.Add(s);
+                }
+                else
+                {
+                    outFormula.Add(s);
+                }
+                if (lpCount == rpCount)
+                {
+                    lpCount = 0;
+                    rpCount = 0;
+                    outFormula.Add(Evaluate(temp));
+                    temp = new ArrayList();
+                }
+
+            }
+
+            inFormula = new ArrayList();
+            String numA;
+            for (int i = 0; i < outFormula.Count; i++)
+            {
+
+                if (i % 2 == 0)
+                {
+                    numA = (String)outFormula[i];
+                }
+                else
+                {
+                    if (outFormula[i].Equals("*"))
+                    {
+                      
+                    }
+                    else if (outFormula[i].Equals("/"))
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }         
+            }
+
+            outFormula = new ArrayList();
+
+            for (int i = 0; i < outFormula.Count; i++)
+            {
+
+            }
+
+            return "";
         }
 
         /// <summary>
