@@ -89,7 +89,8 @@ namespace Formulas
                     this.formula.Add(s);
                 }
             }
-            if(lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
+            if (this.formula.Count <= 0) throw new FormulaFormatException("empty");
+            if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
