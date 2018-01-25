@@ -90,6 +90,7 @@ namespace Formulas
                 }
             }
             if(lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
+            if(this.formula.Count <= 0) throw new FormulaFormatException("empty input");
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
@@ -118,7 +119,7 @@ namespace Formulas
                     }
                     else if ("/".Equals(tokens.Peek()))
                     {
-                        if (dBuff == 0) throw new DivideByZeroException();
+                        if (dBuff == 0.0) throw new DivideByZeroException();
                         tokens.Pop();
                         numbers.Push(numbers.Pop() / dBuff);
                     }
@@ -145,7 +146,7 @@ namespace Formulas
                     }
                     else if ("/".Equals(tokens.Peek()))
                     {
-                        if (dBuff == 0) throw new DivideByZeroException();
+                        if (dBuff == 0.0) throw new DivideByZeroException();
                         tokens.Pop();
                         numbers.Push(numbers.Pop() / dBuff);
                     }
