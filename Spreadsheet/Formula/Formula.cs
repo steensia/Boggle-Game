@@ -51,6 +51,7 @@ namespace Formulas
             int lpCount = 0, rpCount = 0;
             Boolean shouldBeNumber = true;
 
+
             foreach (String s in tokens)
             {
                 if (!Regex.IsMatch(s, spacePattern))
