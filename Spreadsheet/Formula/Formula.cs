@@ -41,13 +41,9 @@ namespace Formulas
         {
             String lpPattern = @"^\($";
             String rpPattern = @"^\)$";
-
             String opPattern = @"^[\+\-*/]$";
-
             String varPattern = @"^[a-zA-Z][0-9a-zA-Z]*$";
-
             String doublePattern = @"^(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?$";
-
             String spacePattern = @"^\s+$";
 
             IEnumerable<string> tokens = GetTokens(formula);
@@ -89,6 +85,7 @@ namespace Formulas
                             throw new FormulaFormatException("Invalid token:" + s);
                         }
                     }
+                    if(lpCount < rpCount) throw new FormulaFormatException("Parethesis missmatch");
                     this.formula.Add(s);
                 }
             }
@@ -105,99 +102,121 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            for(int i = 0 ; i < formula.Count ;i++) formula[i] = lookup(""+formula[i]);
+            Stack<string> tokens = NewMethod();
+            Stack<double> numbers = new Stack<double>();
+            tokens.Push(null);
+            double dBuff;
 
-            double temp = 0.0;
-            double.TryParse(Evaluate(formula), out temp);
-            return temp;
-        }
-
-        private string Evaluate(ArrayList inFormula)
-        {
-
-            ArrayList outFormula = new ArrayList();
-            int lpCount = 0, rpCount = 0;
-            ArrayList temp = new ArrayList();
-
-            for(int i = 0; i < inFormula.Count;i++)
-            {  
-                if ("(".Equals(inFormula[i]))
-                    lpCount++;
-                if (")".Equals(inFormula[i]))
-                    rpCount++;
-                if (lpCount > 0)
-                {
-                    temp.Add(inFormula[i]);
-                }
-                else
-                {
-                    outFormula.Add(inFormula[i]);
-                }
-                if (lpCount == rpCount)
-                {
-                    lpCount = 0;
-                    rpCount = 0;
-                    outFormula.Add(Evaluate(temp));
-                    temp = new ArrayList();
-                }
-
-            }
-
-            inFormula = new ArrayList();
-            double numA = 0.0;
-
-            for (int i = 0; i < outFormula.Count; i++)
+            foreach (String s in formula)
             {
-
-                if (i % 2 == 0)
+                if (double.TryParse(s, out dBuff))
                 {
-                    numA = (double)outFormula[i];
-                }
-                else
-                {
-                    if (outFormula[i].Equals("*"))
+                    if ("*".Equals(tokens.Peek()))
                     {
-
-                        outFormula[i + 1] = (numA * (double)outFormula[i]);
+                        tokens.Pop();
+                        numbers.Push(numbers.Pop() * dBuff);
                     }
-                    else if (outFormula[i].Equals("/"))
+                    else if ("/".Equals(tokens.Peek()))
                     {
-                        outFormula[i + 1] = (numA / (double)outFormula[i]);
+                        if (dBuff == 0) throw new DivideByZeroException();
+                        tokens.Pop();
+                        numbers.Push(numbers.Pop() / dBuff);
                     }
                     else
                     {
-                        inFormula.Add(numA);
-                        inFormula.Add(outFormula[i]);
+                        numbers.Push(dBuff);
                     }
-                }         
-            }
-
-            outFormula = new ArrayList();
-            numA = 0.0;
-            double outD = 0;
-
-            for (int i = 0; i < inFormula.Count; i++)
-            {
-
-                if (i % 2 == 0)
+                }
+                else if (Regex.IsMatch(s, "^[a-zA-Z][0-9a-zA-Z]*$"))
                 {
-                    numA = (double)inFormula[i];
+                    dBuff = lookup(s);
+                    if ("*".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        numbers.Push(numbers.Pop() * dBuff);
+                    }
+                    else if ("/".Equals(tokens.Peek()))
+                    {
+                        if (dBuff == 0) throw new DivideByZeroException();
+                        tokens.Pop();
+                        numbers.Push(numbers.Pop() / dBuff);
+                    }
+                    else
+                    {
+                        numbers.Push(dBuff);
+                    }
+                }
+                else if (Regex.IsMatch(s, "[+-]"))
+                {
+                    if ("+".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        numbers.Push(numbers.Pop() + dBuff);
+                    }
+                    else if ("-".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        numbers.Push(numbers.Pop() - dBuff);
+                    }
+                    tokens.Push(s);
+                }
+                else if (s.Equals(")"))
+                {
+                    if ("+".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        numbers.Push(numbers.Pop() + dBuff);
+                    }
+                    else if ("-".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        numbers.Push(numbers.Pop() - dBuff);
+                    }
+                    tokens.Pop();
+                    if ("*".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        numbers.Push(numbers.Pop() * dBuff);
+                    }
+                    else if ("/".Equals(tokens.Peek()))
+                    {
+                        tokens.Pop();
+                        dBuff = numbers.Pop();
+                        if (dBuff == 0) throw new DivideByZeroException();
+                        numbers.Push(numbers.Pop() / dBuff);
+                    }
                 }
                 else
                 {
-                    if (inFormula[i].Equals("+"))
-                    {
-
-                        inFormula[i + 1] = (numA + (double)inFormula[i]);
-                    }
-                    else if (outFormula[i].Equals("-"))
-                    {
-                        inFormula[i + 1] = (numA - (double)inFormula[i]);
-                    }
+                    tokens.Push(s);
                 }
             }
+            if (tokens.Peek() != null)
+            {
+                if ("+".Equals(tokens.Peek()))
+                {
+                    tokens.Pop();
+                    dBuff = numbers.Pop();
+                    numbers.Push(numbers.Pop() + dBuff);
+                }
+                else if ("-".Equals(tokens.Peek()))
+                {
+                    tokens.Pop();
+                    dBuff = numbers.Pop();
+                    numbers.Push(numbers.Pop() - dBuff);
+                }
+            }
+            return numbers.Pop();
+        }
 
-            return (String)inFormula[inFormula.Count-1];
+        private static Stack<string> NewMethod()
+        {
+            return new Stack<string>();
         }
 
         /// <summary>
