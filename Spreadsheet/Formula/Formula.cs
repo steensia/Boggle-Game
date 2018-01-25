@@ -129,7 +129,15 @@ namespace Formulas
                 }
                 else if (Regex.IsMatch(s, "^[a-zA-Z][0-9a-zA-Z]*$"))
                 {
-                    dBuff = lookup(s);
+                    try
+                    {
+                        dBuff = lookup(s);
+                    }
+                    catch
+                    {
+                        throw new FormulaEvaluationException(s);
+                    }
+
                     if ("*".Equals(tokens.Peek()))
                     {
                         tokens.Pop();
