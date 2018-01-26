@@ -1,4 +1,5 @@
-﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
+﻿// Jacob Haydel u1137077
+// Skeleton written by Joe Zachary for CS 3500, January 2017
 
 using System;
 using System.Collections;
