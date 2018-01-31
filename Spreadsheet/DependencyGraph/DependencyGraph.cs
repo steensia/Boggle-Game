@@ -1,6 +1,7 @@
 ﻿// Skeleton implementation written by Joe Zachary for CS 3500, January 2018.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Dependencies
@@ -46,13 +47,43 @@ namespace Dependencies
     /// the test cases with which you will be graded will create massive DependencyGraphs.  If you
     /// build an inefficient DependencyGraph this week, you will be regretting it for the next month.
     /// </summary>
+
     public class DependencyGraph
     {
+        
+        private class Dependant{
+            public string dependant;
+            public LinkedList<string> dependees;
+            public Dependant(string dependant,string dependee)
+            {
+                this.dependant = dependant; 
+                this.dependees.AddLast(dependee);
+            }     
+        }
+        private class Dependee
+        {
+            public string dependee;
+            public LinkedList<string> dependants;
+            public Dependee(string dependee, string dependant)
+            {
+                this.dependee = dependee;
+                this.dependants.AddLast(dependant);
+            }
+        }
+
+
+        private SortedDictionary<string,Dependant> dependants;
+        private SortedDictionary<string, Dependee> dependees;
+        private int size;
+
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            dependants = new SortedDictionary<string, Dependant>();
+            dependees = new SortedDictionary<string, Dependee>();
+            size = 0;
         }
 
         /// <summary>
@@ -67,8 +98,8 @@ namespace Dependencies
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
         /// </summary>
         public bool HasDependents(string s)
-        {
-            return false;
+        {       
+            return dependees.ContainsKey(s);
         }
 
         /// <summary>
@@ -76,7 +107,7 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
-            return false;
+            return dependants.ContainsKey(s);
         }
 
         /// <summary>
@@ -84,7 +115,8 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            dependants.TryGetValue(s, out Dependant buff);
+            return buff.dependees;
         }
 
         /// <summary>
@@ -92,7 +124,8 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            dependees.TryGetValue(s, out Dependee buff);
+            return buff.dependants;
         }
 
         /// <summary>
@@ -102,6 +135,25 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+           
+            if (dependants.TryGetValue(s, out Dependant dpa))
+            {
+                dpa.dependees.AddLast(t);
+            }
+            else
+            {
+                dependants.Add(s, new Dependant(s, t));
+            }
+
+            if (dependees.TryGetValue(s, out Dependee dpe))
+            {
+                dpe.dependants.AddLast(s);
+            }
+            else
+            {
+                dependants.Add(t, new Dependant(t, s));
+            }
+            size++;
         }
 
         /// <summary>
@@ -111,6 +163,16 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            if (dependants.TryGetValue(s, out Dependant dpa))
+            {
+                dpa.dependees.Remove(t);
+                size--;
+            }
+
+            if (dependees.TryGetValue(s, out Dependee dpe))
+            {
+                dpe.dependants.Remove(s);
+            }
         }
 
         /// <summary>
@@ -120,6 +182,8 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+           // dependees.TryGetValue(s, out Dependee dpe);
+           // foreach (string t in dpe.dependants)
         }
 
         /// <summary>
