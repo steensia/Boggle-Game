@@ -57,6 +57,7 @@ namespace Dependencies
             public Dependant(string dependant,string dependee)
             {
                 this.dependant = dependant; 
+                this.dependees=new LinkedList<string>();
                 this.dependees.AddLast(dependee);
             }     
         }
@@ -67,6 +68,7 @@ namespace Dependencies
             public Dependee(string dependee, string dependant)
             {
                 this.dependee = dependee;
+                this.dependants = new LinkedList<string>();
                 this.dependants.AddLast(dependant);
             }
         }
@@ -145,13 +147,13 @@ namespace Dependencies
                 dependants.Add(s, new Dependant(s, t));
             }
 
-            if (dependees.TryGetValue(s, out Dependee dpe))
+            if (dependees.TryGetValue(t, out Dependee dpe))
             {
                 dpe.dependants.AddLast(s);
             }
             else
             {
-                dependants.Add(t, new Dependant(t, s));
+                dependees.Add(t, new Dependee(t, s));
             }
             size++;
         }
@@ -167,11 +169,18 @@ namespace Dependencies
             {
                 dpa.dependees.Remove(t);
                 size--;
+                if (dpa.dependees.Count == 0)
+                {
+                    dependants.Remove(s);
+                }
             }
 
-            if (dependees.TryGetValue(s, out Dependee dpe))
+            if (dependees.TryGetValue(t, out Dependee dpe))
             {
                 dpe.dependants.Remove(s);
+                if (dpe.dependants.Count == 0){
+                    dependees.Remove(t);
+                }
             }
         }
 
@@ -182,8 +191,16 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-           // dependees.TryGetValue(s, out Dependee dpe);
-           // foreach (string t in dpe.dependants)
+            dependees.TryGetValue(s, out Dependee dpe);
+            foreach (string t in dpe.dependants)
+            {
+                RemoveDependency(s,t);
+            }
+
+            foreach(string t in newDependents)
+            {
+                AddDependency(s, t);
+            }
         }
 
         /// <summary>
@@ -193,6 +210,17 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+
+            dependants.TryGetValue(t, out Dependant dpa);
+            foreach (string s in dpa.dependees)
+            {
+                RemoveDependency(s, t);
+            }
+
+            foreach (string s in newDependees)
+            {
+                AddDependency(s, t);
+            }
         }
     }
 }
