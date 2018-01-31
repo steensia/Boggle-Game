@@ -117,8 +117,9 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            dependants.TryGetValue(s, out Dependant buff);
-            return buff.dependees;
+            if(dependants.TryGetValue(s, out Dependant buff))
+                return buff.dependees;
+            return null;
         }
 
         /// <summary>
@@ -126,8 +127,9 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            dependees.TryGetValue(s, out Dependee buff);
-            return buff.dependants;
+            if(dependees.TryGetValue(s, out Dependee buff))
+                return buff.dependants;
+            return null;
         }
 
         /// <summary>
