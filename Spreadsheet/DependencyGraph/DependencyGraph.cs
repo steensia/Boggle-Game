@@ -51,31 +51,31 @@ namespace Dependencies
     public class DependencyGraph
     {
         
-        private class Dependant{
-            public string dependant;
-            public LinkedList<string> dependees;
-            public Dependant(string dependant,string dependee)
+        private class Dependee{
+            public string dependee;
+            public LinkedList<string> dependents;
+            public Dependee(string dependee,string dependent)
             {
-                this.dependant = dependant; 
-                this.dependees=new LinkedList<string>();
-                this.dependees.AddLast(dependee);
+                this.dependee = dependee; 
+                this.dependents=new LinkedList<string>();
+                this.dependents.AddLast(dependent);
             }     
         }
-        private class Dependee
+        private class Dependent
         {
-            public string dependee;
-            public LinkedList<string> dependants;
-            public Dependee(string dependee, string dependant)
+            public string dependent;
+            public LinkedList<string> dependees;
+            public Dependent(string dependent, string dependee)
             {
-                this.dependee = dependee;
-                this.dependants = new LinkedList<string>();
-                this.dependants.AddLast(dependant);
+                this.dependent = dependent;
+                this.dependees = new LinkedList<string>();
+                this.dependees.AddLast(dependee);
             }
         }
 
 
-        private SortedDictionary<string,Dependant> dependants;
-        private SortedDictionary<string, Dependee> dependees;
+        private SortedDictionary<string,Dependee> dependees;
+        private SortedDictionary<string, Dependent> dependents;
         private int size;
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Dependencies
         /// </summary>
         public DependencyGraph()
         {
-            dependants = new SortedDictionary<string, Dependant>();
             dependees = new SortedDictionary<string, Dependee>();
+            dependents = new SortedDictionary<string, Dependent>();
             size = 0;
         }
 
@@ -93,14 +93,16 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return size; }
         }
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
         /// </summary>
         public bool HasDependents(string s)
-        {       
+        {
+            if (s == null) throw new ArgumentNullException();
+
             return dependees.ContainsKey(s);
         }
 
@@ -109,7 +111,9 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
-            return dependants.ContainsKey(s);
+            if (s == null) throw new ArgumentNullException();
+
+            return dependents.ContainsKey(s);
         }
 
         /// <summary>
@@ -117,8 +121,10 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            if(dependants.TryGetValue(s, out Dependant buff))
-                return buff.dependees;
+            if (s == null) throw new ArgumentNullException();
+
+            if (dependees.TryGetValue(s, out Dependee buff))
+                return buff.dependents;
             return null;
         }
 
@@ -127,9 +133,11 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            if(dependees.TryGetValue(s, out Dependee buff))
-                return buff.dependants;
-            return null;
+            if (s == null) throw new ArgumentNullException();
+
+            if (dependents.TryGetValue(s, out Dependent buff))
+                return buff.dependees;
+            return null;       
         }
 
         /// <summary>
@@ -139,23 +147,25 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-           
-            if (dependants.TryGetValue(s, out Dependant dpa))
+            if (s == null || t == null) throw new ArgumentNullException();
+
+            if (dependees.TryGetValue(s, out Dependee dpa))
             {
-                dpa.dependees.AddLast(t);
+                if (dpa.dependents.Contains(t)) return;
+                dpa.dependents.AddLast(t);
             }
             else
             {
-                dependants.Add(s, new Dependant(s, t));
+                dependees.Add(s, new Dependee(s, t));
             }
 
-            if (dependees.TryGetValue(t, out Dependee dpe))
+            if (dependents.TryGetValue(t, out Dependent dpe))
             {
-                dpe.dependants.AddLast(s);
+                dpe.dependees.AddLast(s);
             }
             else
             {
-                dependees.Add(t, new Dependee(t, s));
+                dependents.Add(t, new Dependent(t, s));
             }
             size++;
         }
@@ -167,23 +177,27 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
-            if (dependants.TryGetValue(s, out Dependant dpa))
+            if (s == null || t == null) throw new ArgumentNullException();
+
+            if (dependees.TryGetValue(s, out Dependee dpa))
             {
-                dpa.dependees.Remove(t);
+                dpa.dependents.Remove(t);
                 size--;
-                if (dpa.dependees.Count == 0)
+                if (dpa.dependents.Count == 0)
                 {
-                    dependants.Remove(s);
+                    dependees.Remove(s);
+                }
+                if (dependents.TryGetValue(t, out Dependent dpe))
+                {
+                    dpe.dependees.Remove(s);
+                    if (dpe.dependees.Count == 0)
+                    {
+                        dependents.Remove(t);
+                    }
                 }
             }
 
-            if (dependees.TryGetValue(t, out Dependee dpe))
-            {
-                dpe.dependants.Remove(s);
-                if (dpe.dependants.Count == 0){
-                    dependees.Remove(t);
-                }
-            }
+            
         }
 
         /// <summary>
@@ -193,15 +207,25 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            dependees.TryGetValue(s, out Dependee dpe);
-            foreach (string t in dpe.dependants)
-            {
-                RemoveDependency(s,t);
-            }
+            if (s == null) throw new ArgumentNullException();
 
-            foreach(string t in newDependents)
+            if (dependees.TryGetValue(s, out Dependee dpe))
             {
-                AddDependency(s, t);
+                foreach (string t in dpe.dependents)
+                {
+                    if(dependents.TryGetValue(t, out Dependent dpa))
+                    {
+                        dpa.dependees.Remove(s);
+                        size--;
+                    }
+                }
+
+                dependees.Remove(s);
+
+                foreach (string t in newDependents)
+                {
+                    AddDependency(s, t);
+                }
             }
         }
 
@@ -212,16 +236,25 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            if (t == null) throw new ArgumentNullException();
 
-            dependants.TryGetValue(t, out Dependant dpa);
-            foreach (string s in dpa.dependees)
+            if (dependents.TryGetValue(t, out Dependent dpa))
             {
-                RemoveDependency(s, t);
-            }
+                foreach (string s in dpa.dependees)
+                {
+                    if (dependees.TryGetValue(s, out Dependee dpe))
+                    {
+                        dpe.dependents.Remove(t);
+                        size--;
+                    }
+                }
 
-            foreach (string s in newDependees)
-            {
-                AddDependency(s, t);
+                dependents.Remove(t);
+
+                foreach (string s in newDependees)
+                {
+                    AddDependency(s, t);
+                }
             }
         }
     }
