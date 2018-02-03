@@ -50,7 +50,7 @@ namespace Dependencies
 
     public class DependencyGraph
     {
-        
+        //stores a list of dependents for a given dependee
         private class Dependee{
             public string dependee;
             public LinkedList<string> dependents;
@@ -61,6 +61,8 @@ namespace Dependencies
                 this.dependents.AddLast(dependent);
             }     
         }
+
+        //strores alist of dependees for a given dependent
         private class Dependent
         {
             public string dependent;
@@ -72,7 +74,6 @@ namespace Dependencies
                 this.dependees.AddLast(dependee);
             }
         }
-
 
         private SortedDictionary<string,Dependee> dependees;
         private SortedDictionary<string, Dependent> dependents;
@@ -195,6 +196,11 @@ namespace Dependencies
                         dependents.Remove(t);
                     }
                 }
+                else
+                {
+                    //throws an exception if a dependece relation exists in one place but not the other
+                    throw new MissingMemberException();
+                }
             }
 
             
@@ -217,6 +223,11 @@ namespace Dependencies
                     {
                         dpa.dependees.Remove(s);
                         size--;
+                    }
+                    else
+                    {
+                        //throws an exception if a dependece relation exists in one place but not the other
+                        throw new MissingMemberException();
                     }
                 }
 
@@ -246,6 +257,11 @@ namespace Dependencies
                     {
                         dpe.dependents.Remove(t);
                         size--;
+                    }
+                    else
+                    {
+                        //throws an exception if a dependece relation exists in one place but not the other
+                        throw new MissingMemberException();
                     }
                 }
 
