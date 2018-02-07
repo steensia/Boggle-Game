@@ -36,7 +36,7 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
-        ArrayList formula;
+        private List<string> formula;
         public Formula(String formula)
         {
             String lpPattern = @"^\($";
@@ -47,7 +47,7 @@ namespace Formulas
             String spacePattern = @"^\s+$";
 
             IEnumerable<string> tokens = GetTokens(formula);
-            this.formula = new ArrayList();
+            this.formula = new List<string>();
             int lpCount = 0, rpCount = 0;
             Boolean shouldBeNumber = true;
 
