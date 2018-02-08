@@ -16,7 +16,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        private ArrayList formula;
+        private List<string> formula;
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -48,7 +48,7 @@ namespace Formulas
             String spacePattern = @"^\s+$";
 
             IEnumerable<string> tokens = GetTokens(formula);
-            this.formula = new ArrayList();
+            this.formula = new List<string>();
             int lpCount = 0, rpCount = 0;
             Boolean shouldBeNumber = true;
 
@@ -92,6 +92,7 @@ namespace Formulas
                 }
             }
             if (this.formula.Count <= 0) throw new FormulaFormatException("empty");
+            if (Regex.IsMatch(this.formula[this.formula.Count-1], opPattern)) throw new FormulaFormatException("ends in operator");
             if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
         /// <summary>
@@ -123,7 +124,7 @@ namespace Formulas
                     }
                     else if ("/".Equals(tokens.Peek()))
                     {
-                        if (dBuff == 0) throw new DivideByZeroException();
+                        if (dBuff == 0) throw new FormulaEvaluationException("/0");
                         tokens.Pop();
                         numbers.Push(numbers.Pop() / dBuff);
                     }
@@ -134,6 +135,7 @@ namespace Formulas
                 }
                 else if (Regex.IsMatch(s, "^[a-zA-Z][0-9a-zA-Z]*$"))
                 {
+
                     try
                     {
                         dBuff = lookup(s);
@@ -150,7 +152,7 @@ namespace Formulas
                     }
                     else if ("/".Equals(tokens.Peek()))
                     {
-                        if (dBuff == 0) throw new DivideByZeroException();
+                        if (dBuff == 0) throw new FormulaEvaluationException("/0");
                         tokens.Pop();
                         numbers.Push(numbers.Pop() / dBuff);
                     }
@@ -200,7 +202,7 @@ namespace Formulas
                     {
                         tokens.Pop();
                         dBuff = numbers.Pop();
-                        if (dBuff == 0) throw new DivideByZeroException();
+                        if (dBuff == 0) throw new FormulaEvaluationException("/0");
                         numbers.Push(numbers.Pop() / dBuff);
                     }
                 }
