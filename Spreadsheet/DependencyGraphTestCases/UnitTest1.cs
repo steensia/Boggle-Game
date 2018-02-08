@@ -8,9 +8,6 @@ namespace DependencyGraphTestCases
     [TestClass]
     public class UnitTest1
     {
-        /// <summary>
-        /// adds 100000 elemnts
-        /// </summary>
         [TestMethod]
         public void TimeTest()
         {
@@ -20,37 +17,17 @@ namespace DependencyGraphTestCases
                 for (int j = 1; j <= 1000; j++)
                 {
                     test.AddDependency("dpa"+j, "dpe"+i);
+                    //test.AddDependency("dpe"+((j*11 % 1000)+1), "dpa"+i);
                 }
+            }
+            
+            for (int j = 1; j <= 1000; j++)
+            {
+                test.GetDependents("dpa" + j);
+                test.GetDependees("dpa" + j);
             }
         }
 
-        /// <summary>
-        /// adds a bunch of items then removes them
-        /// </summary>
-        [TestMethod]
-        public void AddRemoveTest()
-        {
-            DependencyGraph test = new DependencyGraph();
-            for (int i = 1; i <= 100; i++)
-            {
-                for (int j = 1; j <= 100; j++)
-                {
-                    test.AddDependency("dpa" + j, "dpe" + i);
-                }
-            }
-
-            for (int i = 1; i <= 100; i++)
-            {
-                for (int j = 1; j <= 100; j++)
-                {
-                    test.RemoveDependency("dpa" + j, "dpe" + i);
-                }
-            }
-        }
-
-        /// <summary>
-        /// adds and removes things
-        /// </summary>
         [TestMethod]
         public void AddAndRemoveDependecyTest()
         {
@@ -63,9 +40,6 @@ namespace DependencyGraphTestCases
             Assert.IsFalse(test.HasDependents("dpa0"));
         }
 
-        /// <summary>
-        /// adds the same element over and over and makes sure it was only added once
-        /// </summary>
         [TestMethod]
         public void SizeTestWithSameElements()
         {
@@ -78,9 +52,6 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(1, test.Size);
         }
 
-        /// <summary>
-        /// adds 100 elemetns and makes sure that the size is 100
-        /// </summary>
         [TestMethod]
         public void SizeTestWithUniqueElements()
         {
@@ -93,9 +64,6 @@ namespace DependencyGraphTestCases
             Assert.AreEqual(100, test.Size);
         }
 
-        /// <summary>
-        /// test the has dependents funtion
-        /// </summary>
         [TestMethod]
         public void HasDpendentsTest()
         {
@@ -104,9 +72,6 @@ namespace DependencyGraphTestCases
             Assert.IsTrue(test.HasDependents("comps"));
         }
 
-        /// <summary>
-        /// tests the has dependees function
-        /// </summary>
         [TestMethod]
         public void HasDpendeesTest()
         {
@@ -115,9 +80,6 @@ namespace DependencyGraphTestCases
             Assert.IsTrue(test.HasDependees("maths"));
         }
 
-        /// <summary>
-        /// tests the get depedents function
-        /// </summary>
         [TestMethod]
         public void DpendentsTest()
         {
@@ -130,9 +92,6 @@ namespace DependencyGraphTestCases
             }
         }
 
-        /// <summary>
-        /// tests the get dependees function
-        /// </summary>
         [TestMethod]
         public void DpendeesTest()
         {
@@ -145,9 +104,6 @@ namespace DependencyGraphTestCases
             }
         }
 
-        /// <summary>
-        /// tests the Replace dependents function 
-        /// </summary>
         [TestMethod]
         public void ReplaceDependentsTest()
         {
@@ -166,9 +122,6 @@ namespace DependencyGraphTestCases
             }    
         }
 
-        /// <summary>
-        ///tests the replace dependees function
-        /// </summary>
         [TestMethod]
         public void ReplaceDependeesTest()
         {
