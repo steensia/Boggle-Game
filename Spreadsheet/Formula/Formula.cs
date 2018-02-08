@@ -1,10 +1,10 @@
-﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
+﻿// Jacob Haydel u1137077
+// Skeleton written by Joe Zachary for CS 3500, January 2017
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 namespace Formulas
 {
     /// <summary>
@@ -16,6 +16,8 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        private ArrayList formula;
+
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -36,7 +38,6 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
-        private List<string> formula;
         public Formula(String formula)
         {
             String lpPattern = @"^\($";
@@ -47,7 +48,7 @@ namespace Formulas
             String spacePattern = @"^\s+$";
 
             IEnumerable<string> tokens = GetTokens(formula);
-            this.formula = new List<string>();
+            this.formula = new ArrayList();
             int lpCount = 0, rpCount = 0;
             Boolean shouldBeNumber = true;
 
@@ -107,6 +108,8 @@ namespace Formulas
             Stack<string> tokens = NewMethod();
             Stack<double> numbers = new Stack<double>();
             tokens.Push(null);
+
+            //Used to hold numbers while determining what to do with them for proccessing
             double dBuff;
 
             foreach (String s in formula)
@@ -206,6 +209,7 @@ namespace Formulas
                     tokens.Push(s);
                 }
             }
+
             if (tokens.Peek() != null)
             {
                 if ("+".Equals(tokens.Peek()))
