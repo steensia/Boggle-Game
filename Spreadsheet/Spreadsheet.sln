@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyGraph", "DependencyGraph\DependencyGraph.csproj", "{862EAD85-346F-4D2B-A53C-98074FF813BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyGraphTestCases", "DependencyGraphTestCases\DependencyGraphTestCases.csproj", "{63636A07-E0F7-4CF5-B085-37B1A923C26A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS3GradingTests", "PS3GradingTests\PS3GradingTests.csproj", "{0BB0FEFF-986E-496F-9939-8A52E52E083F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{63636A07-E0F7-4CF5-B085-37B1A923C26A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63636A07-E0F7-4CF5-B085-37B1A923C26A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63636A07-E0F7-4CF5-B085-37B1A923C26A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BB0FEFF-986E-496F-9939-8A52E52E083F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BB0FEFF-986E-496F-9939-8A52E52E083F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BB0FEFF-986E-496F-9939-8A52E52E083F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BB0FEFF-986E-496F-9939-8A52E52E083F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
