@@ -125,7 +125,7 @@ namespace Dependencies
 
             if (dependees.TryGetValue(s, out Dependee buff))
                 return buff.dependents;
-            return null;
+            return new List<string>();
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Dependencies
 
             if (dependents.TryGetValue(s, out Dependent buff))
                 return buff.dependees;
-            return null;       
+            return new List<string>();       
         }
 
         /// <summary>
