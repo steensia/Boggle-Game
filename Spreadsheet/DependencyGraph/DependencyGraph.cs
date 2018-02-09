@@ -52,30 +52,26 @@ namespace Dependencies
     {
         
         private class Dependee{
-            public string dependee;
-            public LinkedList<string> dependents;
-            public Dependee(string dependee,string dependent)
-            {
-                this.dependee = dependee; 
-                this.dependents=new LinkedList<string>();
-                this.dependents.AddLast(dependent);
+            public HashSet<string> dependents;
+            public Dependee(string dependent)
+            { 
+                this.dependents=new HashSet<string>();
+                this.dependents.Add(dependent);
             }     
         }
         private class Dependent
         {
-            public string dependent;
-            public LinkedList<string> dependees;
-            public Dependent(string dependent, string dependee)
+            public HashSet<string> dependees;
+            public Dependent(string dependee)
             {
-                this.dependent = dependent;
-                this.dependees = new LinkedList<string>();
-                this.dependees.AddLast(dependee);
+                this.dependees = new HashSet<string>();
+                this.dependees.Add(dependee);
             }
         }
 
 
-        private SortedDictionary<string,Dependee> dependees;
-        private SortedDictionary<string, Dependent> dependents;
+        private Dictionary<string,HashSet<string>> dependees;
+        private Dictionary<string,HashSet<string>> dependents;
         private int size;
 
         /// <summary>
@@ -83,8 +79,8 @@ namespace Dependencies
         /// </summary>
         public DependencyGraph()
         {
-            dependees = new SortedDictionary<string, Dependee>();
-            dependents = new SortedDictionary<string, Dependent>();
+            dependees = new Dictionary<string,HashSet<string>> ();
+            dependents = new Dictionary<string,HashSet<string>> ();
             size = 0;
         }
 
@@ -123,9 +119,9 @@ namespace Dependencies
         {
             if (s == null) throw new ArgumentNullException();
 
-            if (dependees.TryGetValue(s, out Dependee buff))
-                return buff.dependents;
-            return new List<string>();
+            if (dependees.TryGetValue(s, out HashSet<string> buff))
+                return buff;
+            return new HashSet<string>();
         }
 
         /// <summary>
@@ -135,9 +131,9 @@ namespace Dependencies
         {
             if (s == null) throw new ArgumentNullException();
 
-            if (dependents.TryGetValue(s, out Dependent buff))
-                return buff.dependees;
-            return new List<string>();       
+            if (dependents.TryGetValue(s, out HashSet<string> buff))
+                return buff;
+            return new HashSet<string>();       
         }
 
         /// <summary>
@@ -149,23 +145,23 @@ namespace Dependencies
         {
             if (s == null || t == null) throw new ArgumentNullException();
 
-            if (dependees.TryGetValue(s, out Dependee dpa))
+            if (dependees.TryGetValue(s, out HashSet<string> dpa))
             {
-                if (dpa.dependents.Contains(t)) return;
-                dpa.dependents.AddLast(t);
+                if (dpa.Contains(t))return;
+                dpa.Add(t);
             }
             else
             {
-                dependees.Add(s, new Dependee(s, t));
+                dependees.Add(s, new HashSet<string>(new string[]{ t }));
             }
 
-            if (dependents.TryGetValue(t, out Dependent dpe))
+            if (dependents.TryGetValue(t, out HashSet<string> dpe))
             {
-                dpe.dependees.AddLast(s);
+                dpe.Add(s);
             }
             else
             {
-                dependents.Add(t, new Dependent(t, s));
+                dependents.Add(t, new HashSet<string>(new string[] { s }));
             }
             size++;
         }
@@ -179,18 +175,18 @@ namespace Dependencies
         {
             if (s == null || t == null) throw new ArgumentNullException();
 
-            if (dependees.TryGetValue(s, out Dependee dpa))
+            if (dependees.TryGetValue(s, out HashSet<string> dpa))
             {
-                dpa.dependents.Remove(t);
+                dpa.Remove(t);
                 size--;
-                if (dpa.dependents.Count == 0)
+                if (dpa.Count == 0)
                 {
                     dependees.Remove(s);
                 }
-                if (dependents.TryGetValue(t, out Dependent dpe))
+                if (dependents.TryGetValue(t, out HashSet<string> dpe))
                 {
-                    dpe.dependees.Remove(s);
-                    if (dpe.dependees.Count == 0)
+                    dpe.Remove(s);
+                    if (dpe.Count == 0)
                     {
                         dependents.Remove(t);
                     }
@@ -209,24 +205,24 @@ namespace Dependencies
         {
             if (s == null) throw new ArgumentNullException();
 
-            if (dependees.TryGetValue(s, out Dependee dpe))
+            if (dependees.TryGetValue(s, out HashSet<string> dpe))
             {
-                foreach (string t in dpe.dependents)
+                foreach (string t in dpe)
                 {
-                    if(dependents.TryGetValue(t, out Dependent dpa))
+                    if (dependents.TryGetValue(t, out HashSet<string> dpa))
                     {
-                        dpa.dependees.Remove(s);
+                        dpa.Remove(s);
                         size--;
                     }
                 }
-
                 dependees.Remove(s);
+            }
+                
 
                 foreach (string t in newDependents)
                 {
                     AddDependency(s, t);
                 }
-            }
         }
 
         /// <summary>
@@ -238,24 +234,25 @@ namespace Dependencies
         {
             if (t == null) throw new ArgumentNullException();
 
-            if (dependents.TryGetValue(t, out Dependent dpa))
+            if (dependents.TryGetValue(t, out HashSet<string> dpa))
             {
-                foreach (string s in dpa.dependees)
+                foreach (string s in dpa)
                 {
-                    if (dependees.TryGetValue(s, out Dependee dpe))
+                    if (dependees.TryGetValue(s, out HashSet<string> dpe))
                     {
-                        dpe.dependents.Remove(t);
+                        dpe.Remove(t);
                         size--;
                     }
                 }
-
                 dependents.Remove(t);
+            }
+
+               
 
                 foreach (string s in newDependees)
                 {
                     AddDependency(s, t);
                 }
-            }
         }
     }
 }

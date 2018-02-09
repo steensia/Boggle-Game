@@ -865,6 +865,8 @@ namespace GradingTests
                     dees[i] = new HashSet<string>();
                 }
 
+                
+
                 // Add a bunch of dependencies
                 for (int i = 0; i < SIZE; i++)
                 {
@@ -876,6 +878,8 @@ namespace GradingTests
                     }
                 }
 
+                
+
                 // Remove a bunch of dependencies
                 for (int i = 0; i < SIZE; i++)
                 {
@@ -886,6 +890,8 @@ namespace GradingTests
                         dees[j].Remove(letters[i]);
                     }
                 }
+
+                
 
                 // Replace a bunch of dependees
                 for (int i = 0; i < SIZE; i += 2)
@@ -916,6 +922,13 @@ namespace GradingTests
                     Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t.GetDependents(letters[i]))));
                     Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t.GetDependees(letters[i]))));
                 }
+
+                for (int i = 0; i < SIZE; i++)
+                    dents[i].SymmetricExceptWith(t.GetDependents(letters[i]));
+
+                for (int i = 0; i < SIZE; i++)
+                    dees[i].SymmetricExceptWith(t.GetDependees(letters[i]));
+                
             }
 
             [TestMethod()]
