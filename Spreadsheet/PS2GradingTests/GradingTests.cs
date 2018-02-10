@@ -137,10 +137,10 @@ namespace Formulas
         }
 
         [TestMethod()]
-        [ExpectedException(typeof(FormulaEvaluationException))]
+        [ExpectedException(typeof(FormulaFormatException))]
         public void Test18()
         {
-            Formula f = new Formula("(5 + x) / (y - 3)");
+            Formula f = new Formula("(5 + x) / (y - 3)",s=>s.ToUpper(),s=>(false));
             f.Evaluate(s => 3);
         }
 
@@ -278,7 +278,7 @@ namespace Formulas
         [TestMethod()]
         public void Test33()
         {
-            Formula f = new Formula("a+(b+(c+(d+(e+f))))");
+            Formula f = new Formula("a+(b+(c+(d+(e+f))))", s => s,s => true);
             Assert.AreEqual(6, (double)f.Evaluate(s => 1), 1e-9);
         }
 
@@ -286,13 +286,17 @@ namespace Formulas
         public void Test34()
         {
             Formula f = new Formula("((((x1+x2)+x3)+x4)+x5)+x6");
-            Assert.AreEqual(12, (double)f.Evaluate(s => 2), 1e-9);
+            Formula t = new Formula(f.ToString());
+            Assert.AreEqual(12, (double)t.Evaluate(s => 2), 1e-9);
         }
 
         [TestMethod()]
         public void Test35()
         {
-            Formula f = new Formula("a-a*a/a");
+            Formula f = new Formula("a-a*a/a",s=>s.ToUpper(),s=> (s==s.ToUpper()));
+            foreach (string s in f.IGetVariables())
+                Assert.AreEqual(s, "A");
+
             Assert.AreEqual(0, (double)f.Evaluate(s => 3), 1e-9);
         }
 
