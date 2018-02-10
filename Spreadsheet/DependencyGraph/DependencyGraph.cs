@@ -50,26 +50,6 @@ namespace Dependencies
 
     public class DependencyGraph
     {
-        
-        private class Dependee{
-            public HashSet<string> dependents;
-            public Dependee(string dependent)
-            { 
-                this.dependents=new HashSet<string>();
-                this.dependents.Add(dependent);
-            }     
-        }
-        private class Dependent
-        {
-            public HashSet<string> dependees;
-            public Dependent(string dependee)
-            {
-                this.dependees = new HashSet<string>();
-                this.dependees.Add(dependee);
-            }
-        }
-
-
         private Dictionary<string,HashSet<string>> dependees;
         private Dictionary<string,HashSet<string>> dependents;
         private int size;
@@ -81,7 +61,30 @@ namespace Dependencies
         {
             dependees = new Dictionary<string,HashSet<string>> ();
             dependents = new Dictionary<string,HashSet<string>> ();
+
             size = 0;
+        }
+
+        /// <summary>
+        /// Creates a DependencyGraph containing the dependecies contained in graph.
+        /// Throws ArgumentNullException if graph is null
+        /// </summary>
+        public DependencyGraph(DependencyGraph graph)
+        {
+            if (graph == null) throw new ArgumentNullException();
+
+            dependees = new Dictionary<string, HashSet<string>>();
+            dependents = new Dictionary<string, HashSet<string>>();
+
+            size = 0;
+
+            foreach (string s in graph.dependees.Keys)
+            {
+                foreach(string t in graph.GetDependents(s))
+                {
+                    this.AddDependency(s, t);
+                }
+            }     
         }
 
         /// <summary>
@@ -94,6 +97,7 @@ namespace Dependencies
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public bool HasDependents(string s)
         {
@@ -104,6 +108,7 @@ namespace Dependencies
 
         /// <summary>
         /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public bool HasDependees(string s)
         {
@@ -114,6 +119,7 @@ namespace Dependencies
 
         /// <summary>
         /// Enumerates dependents(s).  Requires s != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
@@ -126,6 +132,7 @@ namespace Dependencies
 
         /// <summary>
         /// Enumerates dependees(s).  Requires s != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
@@ -140,6 +147,7 @@ namespace Dependencies
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public void AddDependency(string s, string t)
         {
@@ -157,6 +165,7 @@ namespace Dependencies
 
             if (dependents.TryGetValue(t, out HashSet<string> dpe))
             {
+                if (dpe.Contains(s)) return;
                 dpe.Add(s);
             }
             else
@@ -170,6 +179,7 @@ namespace Dependencies
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// Throws ArgumentNullException 
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
@@ -177,18 +187,23 @@ namespace Dependencies
 
             if (dependees.TryGetValue(s, out HashSet<string> dpa))
             {
-                dpa.Remove(t);
-                size--;
-                if (dpa.Count == 0)
+
+                if (dpa.Remove(t))
                 {
-                    dependees.Remove(s);
-                }
-                if (dependents.TryGetValue(t, out HashSet<string> dpe))
-                {
-                    dpe.Remove(s);
-                    if (dpe.Count == 0)
+                    size--;
+
+                    if (dpa.Count == 0)
                     {
-                        dependents.Remove(t);
+                        dependees.Remove(s);
+                    }
+
+                    if (dependents.TryGetValue(t, out HashSet<string> dpe))
+                    {
+                        dpe.Remove(s);
+                        if (dpe.Count == 0)
+                        {
+                            dependents.Remove(t);
+                        }
                     }
                 }
             }
@@ -200,6 +215,8 @@ namespace Dependencies
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// Throws ArgumentNullException on s and if newDependents contains a null
+        /// 
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
@@ -209,8 +226,9 @@ namespace Dependencies
             {
                 foreach (string t in dpe)
                 {
+                    if (t == null) throw new ArgumentNullException();
                     if (dependents.TryGetValue(t, out HashSet<string> dpa))
-                    {
+                    {             
                         dpa.Remove(s);
                         size--;
                     }
@@ -229,6 +247,7 @@ namespace Dependencies
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// Throws ArgumentNullException on t and if newDependees contains a null
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
@@ -238,6 +257,7 @@ namespace Dependencies
             {
                 foreach (string s in dpa)
                 {
+                    if(s == null) throw new ArgumentNullException();
                     if (dependees.TryGetValue(s, out HashSet<string> dpe))
                     {
                         dpe.Remove(t);

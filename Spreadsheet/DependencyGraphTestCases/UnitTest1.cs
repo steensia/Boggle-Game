@@ -12,15 +12,15 @@ namespace DependencyGraphTestCases
         public void TimeTest()
         {
             DependencyGraph test = new DependencyGraph();
-            for(int i = 1; i <= 100;i++)
+            for (int i = 1; i <= 100; i++)
             {
                 for (int j = 1; j <= 1000; j++)
                 {
-                    test.AddDependency("dpa"+j, "dpe"+i);
+                    test.AddDependency("dpa" + j, "dpe" + i);
                     //test.AddDependency("dpe"+((j*11 % 1000)+1), "dpa"+i);
                 }
             }
-            
+
             for (int j = 1; j <= 1000; j++)
             {
                 test.GetDependents("dpa" + j);
@@ -59,8 +59,11 @@ namespace DependencyGraphTestCases
 
             for (int i = 0; i < 100; i++)
             {
-                test.AddDependency("dpa"+i, "dpe"+i);
+                test.AddDependency("dpa" + i, "dpe" + i);
             }
+
+            DependencyGraph t = new DependencyGraph(test);
+            Assert.AreEqual(test.Size, t.Size);
             Assert.AreEqual(100, test.Size);
         }
 
@@ -68,7 +71,7 @@ namespace DependencyGraphTestCases
         public void HasDpendentsTest()
         {
             DependencyGraph test = new DependencyGraph();
-            test.AddDependency("comps","maths");
+            test.AddDependency("comps", "maths");
             Assert.IsTrue(test.HasDependents("comps"));
         }
 
@@ -85,10 +88,10 @@ namespace DependencyGraphTestCases
         {
             DependencyGraph test = new DependencyGraph();
             test.AddDependency("comps", "maths");
-           
-            foreach(string s in test.GetDependents("comps"))
+
+            foreach (string s in test.GetDependents("comps"))
             {
-                Assert.AreEqual("maths",s);
+                Assert.AreEqual("maths", s);
             }
         }
 
@@ -113,13 +116,13 @@ namespace DependencyGraphTestCases
             replacment.Add("logic");
             replacment.Add("stuff");
 
-            test.ReplaceDependents("comps",replacment);
+            test.ReplaceDependents("comps", replacment);
             int i = 0;
-            foreach(string s in test.GetDependents("comps"))
+            foreach (string s in test.GetDependents("comps"))
             {
                 Assert.IsTrue(replacment[i].Equals(s));
                 i++;
-            }    
+            }
         }
 
         [TestMethod]
@@ -138,6 +141,20 @@ namespace DependencyGraphTestCases
                 Assert.IsTrue(replacment[i].Equals(s));
                 i++;
             }
+        }
+
+        [TestMethod][ExpectedException(typeof(ArgumentNullException))]
+        public void NullTest1()
+        {
+            DependencyGraph test = new DependencyGraph(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NullTest2()
+        {
+            DependencyGraph test = new DependencyGraph();
+            test.AddDependency(null, null);
         }
     }
 }

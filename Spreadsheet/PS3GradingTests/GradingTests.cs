@@ -706,11 +706,20 @@ namespace GradingTests
                     }
                 }
 
+                DependencyGraph t2 = new DependencyGraph(t);
+                Assert.AreEqual(t2.Size , t.Size);
+
                 // Make sure everything is right
                 for (int i = 0; i < SIZE; i++)
                 {
                     Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t.GetDependents(letters[i]))));
                     Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t.GetDependees(letters[i]))));
+                }
+
+                for (int i = 0; i < SIZE; i++)
+                {
+                    Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t2.GetDependents(letters[i]))));
+                    Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t2.GetDependees(letters[i]))));
                 }
             }
 
@@ -808,11 +817,19 @@ namespace GradingTests
                     dents[i] = newDents;
                 }
 
+                DependencyGraph t2 = new DependencyGraph(t);
+                Assert.IsTrue(t2.Size == t.Size);
                 // Make sure everything is right
                 for (int i = 0; i < SIZE; i++)
                 {
                     Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t.GetDependents(letters[i]))));
                     Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t.GetDependees(letters[i]))));
+                }
+
+                for (int i = 0; i < SIZE; i++)
+                {
+                    Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t2.GetDependents(letters[i]))));
+                    Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t2.GetDependees(letters[i]))));
                 }
             }
 
@@ -916,6 +933,8 @@ namespace GradingTests
                     dees[i] = newDees;
                 }
 
+                DependencyGraph t2 = new DependencyGraph(t);
+                Assert.IsTrue(t2.Size == t.Size);
                 // Make sure everything is right
                 for (int i = 0; i < SIZE; i++)
                 {
@@ -924,11 +943,11 @@ namespace GradingTests
                 }
 
                 for (int i = 0; i < SIZE; i++)
-                    dents[i].SymmetricExceptWith(t.GetDependents(letters[i]));
+                {
+                    Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t2.GetDependents(letters[i]))));
+                    Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t2.GetDependees(letters[i]))));
+                }
 
-                for (int i = 0; i < SIZE; i++)
-                    dees[i].SymmetricExceptWith(t.GetDependees(letters[i]));
-                
             }
 
             [TestMethod()]
