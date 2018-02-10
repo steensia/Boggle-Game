@@ -14,7 +14,7 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         private List<string> formula;
 
@@ -40,6 +40,7 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            if (formula == null) throw new ArgumentNullException();
             String lpPattern = @"^\($";
             String rpPattern = @"^\)$";
             String opPattern = @"^[\+\-*/]$";
@@ -95,6 +96,77 @@ namespace Formulas
             if (Regex.IsMatch(this.formula[this.formula.Count-1], opPattern)) throw new FormulaFormatException("ends in operator");
             if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
+
+
+
+
+        public Formula(String formula,Normalizer norm,Validator val)
+        {
+            if (formula == null || norm == null || val == null) throw new ArgumentNullException();
+            String lpPattern = @"^\($";
+            String rpPattern = @"^\)$";
+            String opPattern = @"^[\+\-*/]$";
+            String varPattern = @"^[a-zA-Z][0-9a-zA-Z]*$";
+            String doublePattern = @"^(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?$";
+            String spacePattern = @"^\s+$";
+
+            IEnumerable<string> tokens = GetTokens(formula);
+            this.formula = new List<string>();
+            int lpCount = 0, rpCount = 0;
+            Boolean shouldBeNumber = true;
+            String buff = "";
+
+
+            foreach (String s in tokens)
+            {
+                buff = s;
+                if (!Regex.IsMatch(s, spacePattern))
+                {
+                    if (shouldBeNumber)
+                    {
+                        if (Regex.IsMatch(s, doublePattern))
+                        {
+                            shouldBeNumber = false;
+                        }
+                        else if (Regex.IsMatch(s, varPattern))
+                        {
+                            shouldBeNumber = false;
+                            buff = norm(s);
+                            if (!Regex.IsMatch(buff, varPattern)) throw new FormulaFormatException("Invalide var");
+                            if(!val(buff)) throw new FormulaFormatException("Invalide var");
+                        }
+                        else if (Regex.IsMatch(s, lpPattern))
+                        {
+                            lpCount++;
+                        }
+                        else
+                        {
+                            throw new FormulaFormatException("Invalid token:" + s);
+                        }
+                    }
+                    else
+                    {
+                        if (Regex.IsMatch(s, opPattern))
+                        {
+                            shouldBeNumber = true;
+                        }
+                        else if (Regex.IsMatch(s, rpPattern))
+                        {
+                            rpCount++;
+                        }
+                        else
+                        {
+                            throw new FormulaFormatException("Invalid token:" + s);
+                        }
+                    }
+                    if (lpCount < rpCount) throw new FormulaFormatException("Parethesis missmatch");
+                    this.formula.Add(buff);
+                }
+            }
+            if (this.formula.Count <= 0) throw new FormulaFormatException("empty");
+            if (Regex.IsMatch(this.formula[this.formula.Count - 1], opPattern)) throw new FormulaFormatException("ends in operator");
+            if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
+        }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
         /// delegate takes a variable name as a parameter and returns its value (if it has one) or throws
@@ -106,6 +178,7 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            if (lookup == null) throw new ArgumentNullException();
             Stack<string> tokens = NewMethod();
             Stack<double> numbers = new Stack<double>();
             tokens.Push(null);
@@ -230,6 +303,27 @@ namespace Formulas
             return numbers.Pop();
         }
 
+        public ISet<string> IGetVariables()
+        {
+            HashSet<string> s = new HashSet<string>();
+            foreach (string t in formula)
+            {
+                if (Regex.IsMatch(t, @"^[a-zA-Z][0-9a-zA-Z]*$"))
+                    s.Add(t);
+            }
+            return s;
+        }
+
+        override public string ToString()
+        {
+            string buff = "";
+            foreach (string t in formula)
+            {
+                buff += t;
+            }
+            return buff;
+        }
+
         private static Stack<string> NewMethod()
         {
             return new Stack<string>();
@@ -287,6 +381,8 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
+    public delegate string Normalizer(string s);
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value

@@ -107,7 +107,7 @@ namespace FormulaTestCases
         [TestMethod]
         public void Evaluate4()
         {
-            Formula f = new Formula("x + y");
+            Formula f = new Formula("x + y", s => s, s => true);
             Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
         }
 
