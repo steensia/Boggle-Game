@@ -294,7 +294,7 @@ namespace Formulas
         public void Test35()
         {
             Formula f = new Formula("a-a*a/a",s=>s.ToUpper(),s=> (s==s.ToUpper()));
-            foreach (string s in f.IGetVariables())
+            foreach (string s in f.GetVariables())
                 Assert.AreEqual(s, "A");
 
             Assert.AreEqual(0, (double)f.Evaluate(s => 3), 1e-9);

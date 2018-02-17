@@ -174,7 +174,7 @@ namespace SS
             cells.Remove(name);
             cells.Add(name, new Cell(formula, null));
 
-            dependancyGraph.ReplaceDependees(name, formula.IGetVariables().Distinct());
+            dependancyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 

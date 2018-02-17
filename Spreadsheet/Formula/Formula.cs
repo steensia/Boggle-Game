@@ -303,7 +303,7 @@ namespace Formulas
             return numbers.Pop();
         }
 
-        public ISet<string> IGetVariables()
+        public ISet<string> GetVariables()
         {
             HashSet<string> s = new HashSet<string>();
             foreach (string t in formula)
