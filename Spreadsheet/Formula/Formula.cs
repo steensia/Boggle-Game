@@ -88,19 +88,19 @@ namespace Formulas
                             throw new FormulaFormatException("Invalid token:" + s);
                         }
                     }
-                    if(lpCount < rpCount) throw new FormulaFormatException("Parethesis missmatch");
+                    if (lpCount < rpCount) throw new FormulaFormatException("Parethesis missmatch");
                     this.formula.Add(s);
                 }
             }
             if (this.formula.Count <= 0) throw new FormulaFormatException("empty");
-            if (Regex.IsMatch(this.formula[this.formula.Count-1], opPattern)) throw new FormulaFormatException("ends in operator");
+            if (Regex.IsMatch(this.formula[this.formula.Count - 1], opPattern)) throw new FormulaFormatException("ends in operator");
             if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
 
 
 
 
-        public Formula(String formula,Normalizer norm,Validator val)
+        public Formula(String formula, Normalizer norm, Validator val)
         {
             if (formula == null || norm == null || val == null) throw new ArgumentNullException();
             String lpPattern = @"^\($";
@@ -133,7 +133,7 @@ namespace Formulas
                             shouldBeNumber = false;
                             buff = norm(s);
                             if (!Regex.IsMatch(buff, varPattern)) throw new FormulaFormatException("Invalide var");
-                            if(!val(buff)) throw new FormulaFormatException("Invalide var");
+                            if (!val(buff)) throw new FormulaFormatException("Invalide var");
                         }
                         else if (Regex.IsMatch(s, lpPattern))
                         {

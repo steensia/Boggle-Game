@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Written by Jacob Haydel for CS 3500, February 2018
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,25 +55,28 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
+        //stores the dependecy relations between cells in the spread sheet
         private DependencyGraph dependancyGraph;
-        private Dictionary<string,Cell> cells;
+        //stores a list of non-epty cells
+        private Dictionary<string, Cell> cells;
 
+        //a simple struct to store value and content of unkown type
         private struct Cell
         {
-            public object content,value;
+            public object content, value;
 
-            public Cell(object content,object value)
+            public Cell(object content, object value)
             {
                 this.content = content;
                 this.value = value;
             }
         }
-   
+
         /// <summary>
         /// zero argument constructor that makes an empty spread sheet
         /// </summary>
         public Spreadsheet()
-        {   
+        {
             dependancyGraph = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
         }
@@ -112,34 +117,17 @@ namespace SS
         {
             if (!isValidName(name)) throw new InvalidNameException();
 
-            if (cells.TryGetValue(name, out Cell c))
+            cells.Remove(name);
+            cells.Add(name, new Cell(number, number));
+
+            IEnumerable<string> rec = GetCellsToRecalculate(name);
+
+            foreach (string s in rec)
             {
-                c.content = number;
-                c.value = number;
-            }
-            else
-            {
-                cells.Add(name, new Cell(number, number));
+                recalulate(s);
             }
 
-            GetCellsToRecalculate(name);
-
-            HashSet<string> h = new HashSet<string>();
-            getAllDependees(name, h);
-            return h;
-        }
-
-        private void getAllDependees(string name,HashSet<string> h)
-        {
-            foreach (string s in dependancyGraph.GetDependees(name))
-            {
-                h.Add(s);
-            }
-            foreach (string s in dependancyGraph.GetDependees(name))
-            {
-                h.Contains(name);
-                getAllDependees(s, h);
-            }
+            return getAllDependees(name);
         }
 
         /// <summary>
@@ -159,19 +147,10 @@ namespace SS
             if (text == null) throw new ArgumentNullException();
             if (!isValidName(name)) throw new InvalidNameException();
 
-            if (cells.TryGetValue(name, out Cell c))
-            {
-                c.content = text;
-                c.value = text;
-            }
-            else
-            {
-                cells.Add(name, new Cell(text, text));
-            }
+            cells.Remove(name);
+            cells.Add(name, new Cell(text, text));
 
-            HashSet<string> h = new HashSet<string>();
-            getAllDependees(name, h);
-            return h;
+            return getAllDependees(name);
         }
 
         /// <summary>
@@ -192,52 +171,19 @@ namespace SS
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             if (!isValidName(name)) throw new InvalidNameException();
-            Cell c;
-            if (cells.TryGetValue(name, out c))
+            cells.Remove(name);
+            cells.Add(name, new Cell(formula, null));
+
+            dependancyGraph.ReplaceDependees(name, formula.IGetVariables().Distinct());
+
+            IEnumerable<string> rec = GetCellsToRecalculate(name);
+
+            foreach (string s in rec)
             {
-                c.content = formula;
-                try
-                {
-                    c.value = formula.Evaluate(s => getCellValue(s));
-                }
-                catch(Exception e)
-                {
-                    c.value = e;
-                }
-            }
-            else
-            {
-                c = new Cell(formula, null);
-                try
-                {
-                    c.value = formula.Evaluate(s => getCellValue(s));
-                }
-                catch (Exception e)
-                {
-                    c.value = e;
-                }
-                cells.Add(name,c);
+                recalulate(s);
             }
 
-            HashSet<string> h = new HashSet<string>();
-            getAllDependees(name, h);
-            return h;
-        }
-
-        private double getCellValue(string name)
-        {
-            if(cells.TryGetValue(name, out Cell c))
-            {
-                if (c.value.GetType() == typeof(Double))
-                {
-                    return (Double)c.value;
-                }
-                else if(c.value.GetType() == typeof(Exception))
-                {
-                    throw (Exception)(c.value);
-                }   
-            }
-            throw new UndefinedVariableException(name);
+            return getAllDependees(name);
         }
 
         /// <summary>
@@ -262,18 +208,85 @@ namespace SS
             if (name == null) throw new ArgumentNullException();
             if (!isValidName(name)) throw new InvalidNameException();
 
+            return dependancyGraph.GetDependents(name);
+        }
 
-            if (cells.TryGetValue(name,out Cell c))
+        /// <summary>
+        /// gets all direct and indirect dependees of a given cell
+        /// </summary>
+        private HashSet<string> getAllDependees(string name)
+        {
+            HashSet<string> h0 = new HashSet<string>();
+            HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependees(name));
+            HashSet<string> h2 = new HashSet<string>();
+
+            while (h1.Count > 0)
+            {
+                foreach (string s in h1)
+                {
+                    h0.Add(s);
+                }
+
+                h2 = new HashSet<string>();
+
+                foreach (string s in h1)
+                {
+                    foreach (string t in dependancyGraph.GetDependees(s))
+                        h2.Add(t);
+                }
+
+                h1 = h2;
+            }
+
+            return h0;
+        }
+
+        /// <summary>
+        /// get the value of a given cell
+        /// </summary>
+        private double getCellValue(string name)
+        {
+            if (cells.TryGetValue(name, out Cell c))
+            {
+                if (c.value.GetType() == typeof(Double))
+                {
+                    return (Double)c.value;
+                }
+                else if (c.value.GetType() == typeof(Exception))
+                {
+                    throw (Exception)(c.value);
+                }
+            }
+            throw new UndefinedVariableException(name);
+        }
+
+        /// <summary>
+        /// recalulates the value of a given cell if it is a formula cell
+        /// </summary>
+        private void recalulate(string name)
+        {
+          
+            if (cells.TryGetValue(name, out Cell c))
             {
                 if (c.content.GetType() == typeof(Formula))
                 {
-                    return ((Formula)(c.content)).IGetVariables().Distinct();
+                    try
+                    {
+                        c.value = ((Formula)c.content).Evaluate(s => getCellValue(s));
+                    }
+                    catch (Exception e)
+                    {
+                        c.value = e;
+                    }
+                    cells.Remove(name);
+                    cells.Add(name, c);
                 }
-            }
-
-            return null;
+            }  
         }
 
+        /// <summary>
+        /// returns true if name is a valid cell name and false otherwise
+        /// </summary>
         private Boolean isValidName(string name)
         {
             if (name == null) return false;
