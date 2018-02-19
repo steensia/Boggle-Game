@@ -273,7 +273,7 @@ namespace SS
             cells.Remove(name);
             cells.Add(name, new Cell(formula, null));
 
-            dependancyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
+            dependancyGraph.ReplaceDependents(name, formula.GetVariables().Distinct());
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
@@ -315,7 +315,7 @@ namespace SS
         /// </summary>
         private HashSet<string> getAllDependees(string name)
         {
-            HashSet<string> h0 = new HashSet<string>();
+            HashSet<string> h0 = new HashSet<string>(new string[]{name});
             HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependees(name));
             HashSet<string> h2 = new HashSet<string>();
 
@@ -331,7 +331,10 @@ namespace SS
                 foreach (string s in h1)
                 {
                     foreach (string t in dependancyGraph.GetDependees(s))
+                    {
+                        if (h1.Contains(t)) throw new CircularException();
                         h2.Add(t);
+                    }
                 }
                 h1 = h2;
             }
