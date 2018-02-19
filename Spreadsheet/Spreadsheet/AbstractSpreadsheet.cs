@@ -1,4 +1,5 @@
 ﻿// Written by Joe Zachary for CS 3500, February 2018
+// 12-FEB-18:  Modified comment to clarify that every cell name corresponds to a *unique* cell. 
 
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace SS
     /// For example, "A15", "a15", "XY32", and "BC7" are valid cell names.  On the other hand, 
     /// "Z", "X07", and "hello" are not valid cell names.
     /// 
-    /// A spreadsheet contains a cell corresponding to every possible cell name.  
+    /// A spreadsheet contains a unique cell corresponding to each possible cell name.  
     /// In addition to a name, each cell has a contents and a value.  The distinction is
     /// important, and it is important that you understand the distinction and use
     /// the right term when writing code, writing comments, and asking questions.
