@@ -232,10 +232,7 @@ namespace SS
                 foreach (string s in h1)
                 {
                     foreach (string t in dependancyGraph.GetDependees(s))
-                    {
-                        if (h1.Contains(t)) throw new CircularException();
                         h2.Add(t);
-                    }
                 }
 
                 h1 = h2;
