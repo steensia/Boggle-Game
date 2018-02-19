@@ -225,7 +225,7 @@ namespace SS
         /// </summary>
         private HashSet<string> getAllDependees(string name)
         {
-            HashSet<string> h0 = new HashSet<string>(new string[]{name});
+            HashSet<string> h0 = new HashSet<string>(new string[] { name });
             HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependees(name));
             HashSet<string> h2 = new HashSet<string>();
 
@@ -244,7 +244,7 @@ namespace SS
                     {
                         if (h0.Contains(t)) throw new CircularException();
                         h2.Add(t);
-                    }           
+                    }
                 }
                 h1 = h2;
             }
@@ -275,7 +275,7 @@ namespace SS
         /// </summary>
         private void recalulate(string name)
         {
-          
+
             if (cells.TryGetValue(name, out Cell c))
             {
                 if (c.content.GetType() == typeof(Formula))
@@ -291,7 +291,7 @@ namespace SS
                     cells.Remove(name);
                     cells.Add(name, c);
                 }
-            }  
+            }
         }
 
         /// <summary>
