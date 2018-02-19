@@ -120,6 +120,8 @@ namespace SS
             cells.Remove(name);
             cells.Add(name, new Cell(number, number));
 
+            dependancyGraph.ReplaceDependents(name, new Stack<string>());
+
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             foreach (string s in rec)
@@ -147,7 +149,12 @@ namespace SS
             if (text == null) throw new ArgumentNullException();
             if (!isValidName(name)) throw new InvalidNameException();
 
+            dependancyGraph.ReplaceDependents(name, new Stack<string>());
+
             cells.Remove(name);
+
+            if (text.Equals("")) return getAllDependees(name);
+
             cells.Add(name, new Cell(text, text));
 
             return getAllDependees(name);
@@ -171,10 +178,13 @@ namespace SS
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             if (!isValidName(name)) throw new InvalidNameException();
-            cells.Remove(name);
-            cells.Add(name, new Cell(formula, null));
 
             dependancyGraph.ReplaceDependents(name, formula.GetVariables().Distinct());
+
+            ISet<string> dependees = getAllDependees(name);
+
+            cells.Remove(name);
+            cells.Add(name, new Cell(formula, null));
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
@@ -182,8 +192,7 @@ namespace SS
             {
                 recalulate(s);
             }
-
-            return getAllDependees(name);
+            return dependees;
         }
 
         /// <summary>
@@ -232,12 +241,13 @@ namespace SS
                 foreach (string s in h1)
                 {
                     foreach (string t in dependancyGraph.GetDependees(s))
+                    {
+                        if (h0.Contains(t)) throw new CircularException();
                         h2.Add(t);
+                    }           
                 }
-
                 h1 = h2;
             }
-
             return h0;
         }
 
