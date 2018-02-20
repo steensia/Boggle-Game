@@ -129,7 +129,26 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("<spreadsheet IsValid="+ "IsValid regex goes here"+">");
+            foreach(String s in cells.Keys)
+            {
+                if(cells.TryGetValue(s, out Cell c))
+                {
+                    if (c.content.GetType() == typeof(Double))
+                    {
+                        Console.WriteLine("<cell name="+ s +" contents=" + ((double)c.content).ToString() +"></ cell >");
+                    }
+                    else if (c.content.GetType() == typeof(Formula))
+                    {
+                        Console.WriteLine("<cell name=" + s + " contents=" + ((Formula)c.content).ToString() + "></ cell >");
+                    }
+                    else
+                    {
+                        Console.WriteLine("<cell name=" + s + " contents=" + (string)c.content + "></ cell >");
+                    }
+                }
+            }
+            Console.WriteLine("</spreadsheet>");
         }
 
         // ADDED FOR PS6
@@ -219,7 +238,7 @@ namespace SS
             cells.Remove(name);
             cells.Add(name, new Cell(number, number));
 
-            dependancyGraph.ReplaceDependents(name, new Stack<string>());
+            dependancyGraph.ReplaceDependees(name, new Stack<string>());
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
@@ -228,7 +247,7 @@ namespace SS
                 recalulate(s);
             }
 
-            return getAllDependees(name);
+            return getAllDependents(name);
         }
 
         /// <summary>
@@ -248,15 +267,15 @@ namespace SS
             if (text == null) throw new ArgumentNullException();
             if (!isValidName(name)) throw new InvalidNameException();
 
-            dependancyGraph.ReplaceDependents(name, new Stack<string>());
+            dependancyGraph.ReplaceDependees(name, new Stack<string>());
 
             cells.Remove(name);
 
-            if (text.Equals("")) return getAllDependees(name);
+            if (text.Equals("")) return getAllDependents(name);
 
             cells.Add(name, new Cell(text, text));
 
-            return getAllDependees(name);
+            return getAllDependents(name);
         }
 
         /// <summary>
@@ -278,9 +297,9 @@ namespace SS
         {
             if (!isValidName(name)) throw new InvalidNameException();
 
-            dependancyGraph.ReplaceDependents(name, formula.GetVariables().Distinct());
+            dependancyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
 
-            ISet<string> dependees = getAllDependees(name);
+            ISet<string> dependents = getAllDependents(name);
 
             cells.Remove(name);
             cells.Add(name, new Cell(formula, null));
@@ -291,7 +310,7 @@ namespace SS
             {
                 recalulate(s);
             }
-            return dependees;
+            return dependents;
         }
 
         /// <summary>
@@ -322,17 +341,17 @@ namespace SS
         /// <summary>
         /// gets all direct and indirect dependees of a given cell
         /// </summary>
-        private HashSet<string> getAllDependees(string name)
+        private HashSet<string> getAllDependents(string name)
         {
             HashSet<string> h0 = new HashSet<string>(new string[]{name});
-            HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependees(name));
+            HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependents(name));
             HashSet<string> h2 = new HashSet<string>();
 
             while (h1.Count > 0)
             {
                 foreach (string s in h1)
                 {
-                    if (h0.Contains(s)) throw new CircularException();
+                    if (s.Equals(name)) throw new CircularException();
                     h0.Add(s);
                 }
 
@@ -340,7 +359,7 @@ namespace SS
 
                 foreach (string s in h1)
                 {
-                    foreach (string t in dependancyGraph.GetDependees(s))
+                    foreach (string t in dependancyGraph.GetDependents(s))
                     {                      
                         h2.Add(t);
                     }

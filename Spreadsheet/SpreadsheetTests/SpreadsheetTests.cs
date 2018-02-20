@@ -13,10 +13,10 @@ namespace SpreadsheetTests
         public void Circular()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", 1.0);
-            s.SetCellContents("A2", new Formula("A4 + 1.0"));
-            s.SetCellContents("A3", new Formula("A2 + 1.0"));
-            s.SetCellContents("A4", new Formula("A3 + 1.0"));
+            s.SetContentsOfCell("A1", "1.0");
+            s.SetContentsOfCell("A2", "=A4 + 1.0");
+            s.SetContentsOfCell("A3", "=A2 + 1.0");
+            s.SetContentsOfCell("A4", "=A3 + 1.0");
         }
 
         [TestMethod]
@@ -24,9 +24,9 @@ namespace SpreadsheetTests
         public void CircularTest1000()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", new Formula("A999"));
+            s.SetContentsOfCell("A1", "=A999");
             for (int i = 2; i < 1000; i++)
-                s.SetCellContents("A" + i, new Formula(("A" + i) + "+" + ("A" + (i - 1))));
+                s.SetContentsOfCell("A" + i, ("=A" + i) + "+" + ("A" + (i - 1)));
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace SpreadsheetTests
         public void InvalidNameSetContentsA0()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A0", new Formula("1+1"));
+            s.SetContentsOfCell("A0", "=1+1");
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace SpreadsheetTests
         public void InvalidNameSetContentsaB1()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("aB1", "test");
+            s.SetContentsOfCell("aB1", "test");
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace SpreadsheetTests
         public void InvalidNameSetContentsZ02()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("Z02", 3.14159);
+            s.SetContentsOfCell("Z02", "3.14159");
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace SpreadsheetTests
         public void InvalidNameSetContentsNullName()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents(null, 0.0);
+            s.SetContentsOfCell(null, "0.0");
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace SpreadsheetTests
         public void SetContentsNullValue()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("JACOB13", null);
+            s.SetContentsOfCell("JACOB13", null);
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace SpreadsheetTests
             for (int i = 1; i < 1000; i++)
             {
                 string cell = letter[i % 26] + letter[(i * 100) % 26] + i;
-                s.SetCellContents(cell, cell);
+                s.SetContentsOfCell(cell, cell);
                 refrence.Add(cell);
             }
 
@@ -124,7 +124,7 @@ namespace SpreadsheetTests
         public void GetValidCellContentsDouble()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", 1.0);
+            s.SetContentsOfCell("A1", "1.0");
             Assert.AreEqual(1.0, s.GetCellContents("A1"));
         }
 
@@ -132,7 +132,7 @@ namespace SpreadsheetTests
         public void GetValidCellContentsString()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", "test");
+            s.SetContentsOfCell("A1", "test");
             Assert.AreEqual("test", s.GetCellContents("A1"));
         }
 
@@ -140,7 +140,7 @@ namespace SpreadsheetTests
         public void GetEmptyCellContentsString()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", "test");
+            s.SetContentsOfCell("A1", "test");
             Assert.AreEqual("", s.GetCellContents("A2"));
         }
 
@@ -148,10 +148,10 @@ namespace SpreadsheetTests
         public void AddingTextCells()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", 1.0);
+            s.SetContentsOfCell("A1", "1.0");
             for (int i = 1; i <= 10; i++)
             {
-                s.SetCellContents("A" + i, "A" + i);
+                s.SetContentsOfCell("A" + i, "A" + i);
             }
         }
 
@@ -159,26 +159,26 @@ namespace SpreadsheetTests
         public void FormulaReferencingText()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", "text");
-            s.SetCellContents("B1", new Formula("A1 * 2"));
+            s.SetContentsOfCell("A1", "text");
+            s.SetContentsOfCell("B1", "=A1 * 2");
         }
 
         [TestMethod]
         public void UpdateCells()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", 1.0);
+            s.SetContentsOfCell("A1", "1.0");
             for (int i = 2; i <= 10; i++)
             {
-                s.SetCellContents("A" + i, new Formula("A" + (i - 1) + " + 1.0"));
-                // Assert.AreEqual(s.getCellValue("A"+i), i);
+                s.SetContentsOfCell("A" + i, "=A" + (i - 1) + " + 1.0");
+                Assert.AreEqual((double)i,s.GetCellValue("A"+i));
             }
 
-            s.SetCellContents("A1", 2.0);
+            s.SetContentsOfCell("A1", "2.0");
 
             for (int i = 1; i <= 10; i++)
             {
-                // Assert.AreEqual(i+1, s.getCellValue("A" + i));
+                Assert.AreEqual(i+1.0, s.GetCellValue("A" + i));
             }
         }
 
@@ -189,28 +189,28 @@ namespace SpreadsheetTests
             i0 = 1.0;
             i1 = 1.0;
             Spreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", 1.0);
-            s.SetCellContents("A2", 1.0);
+            s.SetContentsOfCell("A1", "1.0");
+            s.SetContentsOfCell("A2", "1.0");
 
             for (int i = 3; i <= 20; i++)
             {
                 i2 = i0 + i1;
                 i0 = i1;
                 i1 = i2;
-                s.SetCellContents("A" + i, new Formula("A" + (i - 1) + "+A" + (i - 2)));
-                //Assert.AreEqual(s.getCellValue("A" + i), i2);
+                s.SetContentsOfCell("A" + i, "=A" + (i - 1) + "+A" + (i - 2));
+                Assert.AreEqual(s.GetCellValue("A" + i), i2);
             }
 
             i0 = 42;
             i1 = 42;
-            s.SetCellContents("A1", i0);
-            s.SetCellContents("A2", i1);
+            s.SetContentsOfCell("A1", ""+i0);
+            s.SetContentsOfCell("A2", ""+i1);
             for (int i = 3; i <= 20; i++)
             {
                 i2 = i0 + i1;
                 i0 = i1;
                 i1 = i2;
-                //Assert.AreEqual(i2, s.getCellValue("A" + i));
+                Assert.AreEqual(i2, s.GetCellValue("A" + i));
             }
         }
     }
