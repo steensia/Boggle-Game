@@ -191,9 +191,9 @@ namespace SS
             {
                 return SetCellContents(name, d);
             }
-            else if (content.Length > 0 && content.Substring(0, 1).Equals("="))
+            else if (content.Length > 1 && content.Substring(0, 1).Equals("="))
             {
-                Formula f = new Formula(content, s => s.ToUpper(), s => isValidName(s));
+                Formula f = new Formula(content.Substring(1,content.Length-1), s => s.ToUpper(), s => isValidName(s));
                 return SetCellContents(name, f);
             }
             else
@@ -218,6 +218,8 @@ namespace SS
 
             cells.Remove(name);
             cells.Add(name, new Cell(number, number));
+
+            dependancyGraph.ReplaceDependents(name, new Stack<string>());
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
@@ -246,7 +248,12 @@ namespace SS
             if (text == null) throw new ArgumentNullException();
             if (!isValidName(name)) throw new InvalidNameException();
 
+            dependancyGraph.ReplaceDependents(name, new Stack<string>());
+
             cells.Remove(name);
+
+            if (text.Equals("")) return getAllDependees(name);
+
             cells.Add(name, new Cell(text, text));
 
             return getAllDependees(name);
@@ -270,10 +277,13 @@ namespace SS
         protected override ISet<string> SetCellContents(string name, Formula formula)
         {
             if (!isValidName(name)) throw new InvalidNameException();
-            cells.Remove(name);
-            cells.Add(name, new Cell(formula, null));
 
             dependancyGraph.ReplaceDependents(name, formula.GetVariables().Distinct());
+
+            ISet<string> dependees = getAllDependees(name);
+
+            cells.Remove(name);
+            cells.Add(name, new Cell(formula, null));
 
             IEnumerable<string> rec = GetCellsToRecalculate(name);
 
@@ -281,8 +291,7 @@ namespace SS
             {
                 recalulate(s);
             }
-
-            return getAllDependees(name);
+            return dependees;
         }
 
         /// <summary>
@@ -323,6 +332,7 @@ namespace SS
             {
                 foreach (string s in h1)
                 {
+                    if (h0.Contains(s)) throw new CircularException();
                     h0.Add(s);
                 }
 
@@ -331,8 +341,7 @@ namespace SS
                 foreach (string s in h1)
                 {
                     foreach (string t in dependancyGraph.GetDependees(s))
-                    {
-                        if (h1.Contains(t)) throw new CircularException();
+                    {                      
                         h2.Add(t);
                     }
                 }
