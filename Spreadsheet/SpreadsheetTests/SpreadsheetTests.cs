@@ -2,6 +2,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SS;
 using Formulas;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml;
+using System;
+using System.Text.RegularExpressions;
 
 namespace SpreadsheetTests
 {
@@ -39,10 +43,10 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
-        public void InvalidNameGetContentsaB1()
+        public void InvalidNameGetContentsa1()
         {
             Spreadsheet s = new Spreadsheet();
-            s.GetCellContents("aB1");
+            s.GetCellContents("a*1");
         }
 
         [TestMethod]
@@ -71,10 +75,10 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
-        public void InvalidNameSetContentsaB1()
+        public void InvalidNameSetContentsa1()
         {
             Spreadsheet s = new Spreadsheet();
-            s.SetContentsOfCell("aB1", "test");
+            s.SetContentsOfCell("a*1", "test");
         }
 
         [TestMethod]
@@ -211,7 +215,50 @@ namespace SpreadsheetTests
                 i0 = i1;
                 i1 = i2;
                 Assert.AreEqual(i2, s.GetCellValue("A" + i));
+            }      
+        }
+        [TestMethod]
+        public void FibinochiSave()
+        {
+            double i0, i1, i2;
+            i0 = 1.0;
+            i1 = 1.0;
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "1.0");
+            s.SetContentsOfCell("A2", "1.0");
+
+            for (int i = 3; i <= 10; i++)
+            {
+                i2 = i0 + i1;
+                i0 = i1;
+                i1 = i2;
+                s.SetContentsOfCell("A" + i, "=A" + (i - 1) + "+A" + (i - 2));
+                Assert.AreEqual(s.GetCellValue("A" + i), i2);
             }
+
+            TextWriter t = new StreamWriter("text.xml");
+            s.Save(t);
+            t.Close();
+            TextReader r = new StreamReader("text.xml");
+            s = new Spreadsheet(r, new Regex("^[A-Z]+[1-9][0-9]*$"));
+
+            i0 = 1.0;
+            i1 = 1.0;
+
+            for (int i = 3; i <= 10; i++)
+            {
+                i2 = i0 + i1;
+                i0 = i1;
+                i1 = i2;
+                Assert.AreEqual(s.GetCellValue("A" + i), i2);
+            }
+        }
+
+        [TestMethod]
+        public void Load()
+        {
+            TextReader r = new StreamReader("./SampleSavedSpreadsheet.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^[A-Z]+[1-9][0-9]*$"));
         }
     }
 }

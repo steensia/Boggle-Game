@@ -97,9 +97,6 @@ namespace Formulas
             if (lpCount != rpCount) throw new FormulaFormatException("Parethesis missmatch");
         }
 
-
-
-
         public Formula(String formula, Normalizer norm, Validator val)
         {
             if (formula == null || norm == null || val == null) throw new ArgumentNullException();
@@ -179,7 +176,7 @@ namespace Formulas
         public double Evaluate(Lookup lookup)
         {
             if (lookup == null) throw new ArgumentNullException();
-            Stack<string> tokens = NewMethod();
+            Stack<string> tokens = new Stack<string>();
             Stack<double> numbers = new Stack<double>();
             tokens.Push(null);
 
@@ -322,11 +319,6 @@ namespace Formulas
                 buff += t;
             }
             return buff;
-        }
-
-        private static Stack<string> NewMethod()
-        {
-            return new Stack<string>();
         }
 
         /// <summary>
