@@ -74,6 +74,13 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        public void SetCellContentsEmptyString()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "");
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void InvalidNameSetContentsa1()
         {
@@ -141,6 +148,42 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        public void GetCellValueEmptyCell()
+        {
+            Spreadsheet s = new Spreadsheet();
+            Assert.AreEqual("",s.GetCellValue("BlAzE420"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void GetCellContentsNullName()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "test");
+            s.GetCellContents(null);
+            Assert.AreEqual("test", s.GetCellContents(null));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void GetCellValueNullName()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "test");
+            s.GetCellValue(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void GetCellContentsInvalidName()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "test");
+            s.GetCellContents("420_BLAZE_");
+            Assert.AreEqual("test", s.GetCellContents("420_BLAZE_"));
+        }
+
+        [TestMethod]
         public void GetEmptyCellContentsString()
         {
             Spreadsheet s = new Spreadsheet();
@@ -187,12 +230,43 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void UpdateCellsNull()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "1.0");
+            for (int i = 2; i <= 10; i++)
+            {
+                s.SetContentsOfCell("A" + i, "=A" + (i - 1) + " + 1.0");
+                Assert.AreEqual((double)i, s.GetCellValue("A" + i));
+            }
+
+            s.SetContentsOfCell("A1", null);
+
+            for (int i = 1; i <= 10; i++)
+            {
+                Assert.AreEqual(i + 1.0, s.GetCellValue("A" + i));
+            }
+        }
+
+        [TestMethod]
+        public void EvaluationError()
+        {
+            Spreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "blaze");
+            s.SetContentsOfCell("A2", "=X5+1");
+            s.SetContentsOfCell("A3", "=A2+1");
+            Exception e = new FormulaEvaluationException("");
+            Assert.IsTrue(typeof(FormulaEvaluationException) == ((Exception)s.GetCellValue("A3")).GetType());
+        }
+
+        [TestMethod]
         public void Fibinochi()
         {
             double i0, i1, i2;
             i0 = 1.0;
             i1 = 1.0;
-            Spreadsheet s = new Spreadsheet();
+            Spreadsheet s = new Spreadsheet(new Regex("^.*$"));
             s.SetContentsOfCell("A1", "1.0");
             s.SetContentsOfCell("A2", "1.0");
 
@@ -217,8 +291,9 @@ namespace SpreadsheetTests
                 Assert.AreEqual(i2, s.GetCellValue("A" + i));
             }      
         }
+
         [TestMethod]
-        public void FibinochiSave()
+        public void FibonacciSave()
         {
             double i0, i1, i2;
             i0 = 1.0;
@@ -226,6 +301,7 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "1.0");
             s.SetContentsOfCell("A2", "1.0");
+            s.SetContentsOfCell("B1", "Fibonacci");
 
             for (int i = 3; i <= 10; i++)
             {
@@ -235,11 +311,11 @@ namespace SpreadsheetTests
                 s.SetContentsOfCell("A" + i, "=A" + (i - 1) + "+A" + (i - 2));
                 Assert.AreEqual(s.GetCellValue("A" + i), i2);
             }
-
-            TextWriter t = new StreamWriter("text.xml");
+            Assert.IsTrue(s.Changed);
+            TextWriter t = new StreamWriter("Fibonacci.xml");
             s.Save(t);
             t.Close();
-            TextReader r = new StreamReader("text.xml");
+            TextReader r = new StreamReader("Fibonacci.xml");
             s = new Spreadsheet(r, new Regex("^[A-Z]+[1-9][0-9]*$"));
 
             i0 = 1.0;
@@ -255,10 +331,66 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
-        public void Load()
+        public void LoadValid()
         {
             TextReader r = new StreamReader("./SampleSavedSpreadsheet.xml");
             Spreadsheet s = new Spreadsheet(r, new Regex("^[A-Z]+[1-9][0-9]*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void LoadInvalidSchema()
+        {
+            TextReader r = new StreamReader("./invalidSchema.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void LoadInvalidRegex()
+        {
+            TextReader r = new StreamReader("./invalidRegex.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void LoadDuplicate()
+        {
+            TextReader r = new StreamReader("./repeatedElement.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void LoadInvalidWithOldIsValid()
+        {
+            TextReader r = new StreamReader("./invalidCellNameA08.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetVersionException))]
+        public void LoadInvalidWithNewIsValid()
+        {
+            TextReader r = new StreamReader("./valid.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^[B-Z]+[1-9][0-9]*$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void LoadCircularException()
+        {
+            TextReader r = new StreamReader("./circularDependency.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+        }
+
+        [TestMethod]
+        public void LoadValid2()
+        {
+            TextReader r = new StreamReader("./valid.xml");
+            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
+            Assert.IsFalse(s.Changed);
         }
     }
 }

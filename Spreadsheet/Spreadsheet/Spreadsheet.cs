@@ -165,7 +165,7 @@ namespace SS
                 {
                     oldIsValid = new Regex(temp);
                 }
-                catch (ArgumentException e)
+                catch (ArgumentException)
                 {
                     throw new SpreadsheetReadException("invalid regex read from file");
                 }
@@ -191,29 +191,6 @@ namespace SS
                 }
             }
             Changed = false;
-        }
-
-        /// <summary>
-        /// If name is null or invalid, throws an InvalidNameException.
-        /// 
-        /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
-        /// value should be either a string, a double, or a Formula.
-        /// </summary>
-        public override object GetCellContents(string name)
-        {
-            if (!IsValidName(name)) throw new InvalidNameException();
-
-            if (cells.TryGetValue(name, out Cell c))
-                return c.content;
-            else return "";
-        }
-
-        /// <summary>
-        /// Enumerates the names of all the non-empty cells in the spreadsheet.
-        /// </summary>
-        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
-        {
-            return cells.Keys;
         }
 
         // ADDED FOR PS6
@@ -271,6 +248,29 @@ namespace SS
                 t.WriteEndElement();
             }
             Changed = false;
+        }
+
+        /// <summary>
+        /// Enumerates the names of all the non-empty cells in the spreadsheet.
+        /// </summary>
+        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
+        {
+            return cells.Keys;
+        }
+
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
+        /// value should be either a string, a double, or a Formula.
+        /// </summary>
+        public override object GetCellContents(string name)
+        {
+            if (!IsValidName(name)) throw new InvalidNameException();
+
+            if (cells.TryGetValue(name, out Cell c))
+                return c.content;
+            else return "";
         }
 
         // ADDED FOR PS6
@@ -423,6 +423,8 @@ namespace SS
         {
             if (!IsValidName(name)) throw new InvalidNameException();
 
+            formula = new Formula(formula.ToString().ToUpper());
+
             dependancyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
 
             ISet<string> dependents = getAllDependents(name);
@@ -530,10 +532,6 @@ namespace SS
                 if (c.value.GetType() == typeof(Double))
                 {
                     return (Double)c.value;
-                }
-                else if (c.value.GetType() == typeof(Exception))
-                {
-                    throw (Exception)(c.value);
                 }
             }
             throw new UndefinedVariableException(name);
