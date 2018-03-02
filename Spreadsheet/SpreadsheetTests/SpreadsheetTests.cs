@@ -250,17 +250,6 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
-        public void EvaluationError()
-        {
-            Spreadsheet s = new Spreadsheet();
-            s.SetContentsOfCell("A1", "blaze");
-            s.SetContentsOfCell("A2", "=X5+1");
-            s.SetContentsOfCell("A3", "=A2+1");
-            Exception e = new FormulaEvaluationException("");
-            Assert.IsTrue(typeof(FormulaEvaluationException) == ((Exception)s.GetCellValue("A3")).GetType());
-        }
-
-        [TestMethod]
         public void Fibinochi()
         {
             double i0, i1, i2;
@@ -328,69 +317,6 @@ namespace SpreadsheetTests
                 i1 = i2;
                 Assert.AreEqual(s.GetCellValue("A" + i), i2);
             }
-        }
-
-        [TestMethod]
-        public void LoadValid()
-        {
-            TextReader r = new StreamReader("./SampleSavedSpreadsheet.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^[A-Z]+[1-9][0-9]*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadException))]
-        public void LoadInvalidSchema()
-        {
-            TextReader r = new StreamReader("./invalidSchema.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadException))]
-        public void LoadInvalidRegex()
-        {
-            TextReader r = new StreamReader("./invalidRegex.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadException))]
-        public void LoadDuplicate()
-        {
-            TextReader r = new StreamReader("./repeatedElement.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadException))]
-        public void LoadInvalidWithOldIsValid()
-        {
-            TextReader r = new StreamReader("./invalidCellNameA08.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetVersionException))]
-        public void LoadInvalidWithNewIsValid()
-        {
-            TextReader r = new StreamReader("./valid.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^[B-Z]+[1-9][0-9]*$"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadException))]
-        public void LoadCircularException()
-        {
-            TextReader r = new StreamReader("./circularDependency.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-        }
-
-        [TestMethod]
-        public void LoadValid2()
-        {
-            TextReader r = new StreamReader("./valid.xml");
-            Spreadsheet s = new Spreadsheet(r, new Regex("^.*$"));
-            Assert.IsFalse(s.Changed);
         }
     }
 }
