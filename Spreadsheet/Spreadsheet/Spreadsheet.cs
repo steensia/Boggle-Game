@@ -69,7 +69,7 @@ namespace SS
     public class Spreadsheet : AbstractSpreadsheet
     {
         //stores the dependecy relations between cells in the spread sheet
-        private DependencyGraph dependancyGraph;
+        private DependencyGraph dependencyGraph;
         //stores a list of non-epty cells
         private Dictionary<string, Cell> cells;
         //stores the regular expression to validate the cell names in the current instance of spreadsheet
@@ -98,7 +98,7 @@ namespace SS
         /// </summary>
         public Spreadsheet()
         {
-            dependancyGraph = new DependencyGraph();
+            dependencyGraph = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
             isValid = new Regex("^[A-Z]+[1-9][0-9]*$");
             Changed = false;
@@ -107,7 +107,7 @@ namespace SS
         /// Creates an empty Spreadsheet whose IsValid regular expression is provided as the parameter
         public Spreadsheet(Regex isValid)
         {
-            dependancyGraph = new DependencyGraph();
+            dependencyGraph = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
             this.isValid = isValid;
             Changed = false;
@@ -144,16 +144,17 @@ namespace SS
         /// the new Spreadsheet's IsValid regular expression should be newIsValid.
         public Spreadsheet(TextReader source, Regex newIsValid)
         {
-            dependancyGraph = new DependencyGraph();
+            dependencyGraph = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
             isValid = newIsValid;
 
 
             XmlSchemaSet schema = new XmlSchemaSet();
-            schema.Add(null, "./Spreadsheet.xsd");
+            schema.Add(null, "Spreadsheet.xsd");
 
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.Schemas = schema;
+            settings.ValidationEventHandler += ValidationCallBack;
 
             using (XmlReader t = XmlReader.Create(source, settings))
             {
@@ -181,7 +182,14 @@ namespace SS
                             if (cells.ContainsKey(name)) throw new SpreadsheetReadException(name + " was repeated");
                             if (!IsValidName(name)) throw new SpreadsheetVersionException(name);
                             string contents = t.GetAttribute("contents");
-                            SetContentsOfCell(name, contents);
+                            try
+                            {
+                                SetContentsOfCell(name, contents);
+                            }
+                            catch
+                            {
+                                throw new SpreadsheetReadException("");
+                            }
                         }
                     }
                 }
@@ -267,6 +275,7 @@ namespace SS
         public override object GetCellContents(string name)
         {
             if (!IsValidName(name)) throw new InvalidNameException();
+            name = name.ToUpper();
 
             if (cells.TryGetValue(name, out Cell c))
                 return c.content;
@@ -283,6 +292,7 @@ namespace SS
         public override object GetCellValue(string name)
         {
             if (!IsValidName(name)) throw new InvalidNameException();
+            name = name.ToUpper();
 
             if (cells.TryGetValue(name, out Cell c))
             {
@@ -358,13 +368,13 @@ namespace SS
         protected override ISet<string> SetCellContents(string name, double number)
         {
             if (!IsValidName(name)) throw new InvalidNameException();
+            
+            dependencyGraph.ReplaceDependees(name, new Stack<string>());
+
+            IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             cells.Remove(name);
             cells.Add(name, new Cell(number, number));
-
-            dependancyGraph.ReplaceDependees(name, new Stack<string>());
-
-            IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             foreach (string s in rec)
             {
@@ -372,7 +382,7 @@ namespace SS
             }
 
             Changed = true;
-            return getAllDependents(name);
+            return new HashSet<string>(rec);
         }
 
         /// <summary>
@@ -392,16 +402,18 @@ namespace SS
             if (text == null) throw new ArgumentNullException();
             if (!IsValidName(name)) throw new InvalidNameException();
 
-            dependancyGraph.ReplaceDependees(name, new Stack<string>());
+            dependencyGraph.ReplaceDependees(name, new Stack<string>());
+
+            IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             cells.Remove(name);
 
-            if (text.Equals("")) return getAllDependents(name);
+            if (text.Equals("")) return new HashSet<string>(rec);
 
             cells.Add(name, new Cell(text, text));
 
             Changed = true;
-            return getAllDependents(name);
+            return new HashSet<string>(rec);
         }
 
         /// <summary>
@@ -424,15 +436,12 @@ namespace SS
             if (!IsValidName(name)) throw new InvalidNameException();
 
             formula = new Formula(formula.ToString().ToUpper());
+            dependencyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
 
-            dependancyGraph.ReplaceDependees(name, formula.GetVariables().Distinct());
-
-            ISet<string> dependents = getAllDependents(name);
+            IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             cells.Remove(name);
             cells.Add(name, new Cell(formula, null));
-
-            IEnumerable<string> rec = GetCellsToRecalculate(name);
 
             foreach (string s in rec)
             {
@@ -440,7 +449,7 @@ namespace SS
             }
 
             Changed = true;
-            return dependents;
+            return new HashSet<string>(rec);
         }
 
         /// <summary>
@@ -465,38 +474,7 @@ namespace SS
             if (name == null) throw new ArgumentNullException();
             if (!IsValidName(name)) throw new InvalidNameException();
 
-            return dependancyGraph.GetDependents(name);
-        }
-
-        /// <summary>
-        /// gets all direct and indirect dependees of a given cell
-        /// </summary>
-        private HashSet<string> getAllDependents(string name)
-        {
-            HashSet<string> h0 = new HashSet<string>(new string[] { name });
-            HashSet<string> h1 = new HashSet<string>(dependancyGraph.GetDependents(name));
-            HashSet<string> h2 = new HashSet<string>();
-
-            while (h1.Count > 0)
-            {
-                foreach (string s in h1)
-                {
-                    if (s.Equals(name)) throw new CircularException();
-                    h0.Add(s);
-                }
-
-                h2 = new HashSet<string>();
-
-                foreach (string s in h1)
-                {
-                    foreach (string t in dependancyGraph.GetDependents(s))
-                    {
-                        h2.Add(t);
-                    }
-                }
-                h1 = h2;
-            }
-            return h0;
+            return dependencyGraph.GetDependents(name);
         }
 
         /// <summary>
@@ -512,9 +490,9 @@ namespace SS
                     {
                         c.value = ((Formula)c.content).Evaluate(s => formulaCellValue(s));
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        c.value = e;
+                        c.value = new FormulaError();
                     }
                     cells.Remove(name);
                     cells.Add(name, c);
@@ -555,6 +533,11 @@ namespace SS
             if (name == null || !Regex.IsMatch(name.ToUpper(), "^[A-Z]+[1-9][0-9]*$") || !valid.IsMatch(name.ToUpper()))
                 return false;
             return true;
+        }
+
+        private static void ValidationCallBack(object sender, ValidationEventArgs e)
+        {
+            throw new SpreadsheetReadException("Inconsistent with schema");
         }
 
     }
