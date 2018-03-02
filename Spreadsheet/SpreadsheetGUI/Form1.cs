@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,6 +15,7 @@ namespace SpreadsheetGUI
     {
         public Form1()
         {
+            Spreadsheet sheet = new Spreadsheet();
             InitializeComponent();
         }
 

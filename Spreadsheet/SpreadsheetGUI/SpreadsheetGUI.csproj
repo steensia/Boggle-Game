@@ -78,5 +78,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Spreadsheet\Spreadsheet.csproj">
+      <Project>{9025A594-DF2A-4E6A-B8C2-F087ECC3E203}</Project>
+      <Name>Spreadsheet</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
