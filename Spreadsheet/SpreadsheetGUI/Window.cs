@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using SS;
 using Formulas;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using SSGui;
 
 namespace SpreadsheetGUI
 {
@@ -25,38 +27,23 @@ namespace SpreadsheetGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-            dataGridView1.ColumnCount = 26;
-            dataGridView1.RowCount = 99;
-
-            sheet.SetContentsOfCell("B1", "2");
-            sheet.SetContentsOfCell("A2", "=A1*2");
-
-            for (int i = 0; i < dataGridView1.ColumnCount; i++)
-            {
-                dataGridView1.Columns[i].Name = "" + (char)('A' + i);
-            }
-
-
             for (int r = 0; r < 99; r++)
             {
-                string[] l = new string[26];
-
                 for (int c = 0; c < 26; c++)
                 {
-                    l[c] = (sheet.GetCellValue(getCellName(r, c)).ToString());
-
+                    spreadsheetPanel1.SetValue(c, r, sheet.GetCellValue(getCellName(r, c)).ToString());
                 }
-                dataGridView1.Rows[r].SetValues(l);
             }
-
+            selectedCell = "A1";
+            spreadsheetPanel1_SelectionChanged(spreadsheetPanel1);
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void spreadsheetPanel1_SelectionChanged(SpreadsheetPanel sender)
         {
-            if (e.ColumnIndex >= 0 && e.RowIndex >= 0)
+            sender.GetSelection(out int c, out int r);
+            if (c >= 0 && r >= 0)
             {
-                selectedCell = getCellName(e.RowIndex, e.ColumnIndex);
+                selectedCell = getCellName(r, c);
                 Value.Text = sheet.GetCellValue(selectedCell).ToString();
                 object o = sheet.GetCellContents(selectedCell);
                 if (o is Formula)
@@ -77,17 +64,18 @@ namespace SpreadsheetGUI
             {
                 sheet.SetContentsOfCell(selectedCell, Contents.Text);
                 Value.Text = sheet.GetCellValue(selectedCell).ToString();
+                ErrorBox.Text = "";
             }
             catch (Exception ex)
             {
-                Value.Text = ex.ToString();
+                ErrorBox.Text = ex.ToString();
             }
 
             for (int r = 0; r < 99; r++)
             {
                 for (int c = 0; c < 26; c++)
                 {
-                    dataGridView1.Rows[r].Cells[c].Value = (sheet.GetCellValue(getCellName(r, c)).ToString());
+                    spreadsheetPanel1.SetValue(c, r, sheet.GetCellValue(getCellName(r, c)).ToString());
                 }
             }
         }
@@ -97,17 +85,31 @@ namespace SpreadsheetGUI
             return "" + (char)('A' + c) + (r + 1);
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void New_Click(object sender, EventArgs e)
         {
-
+            Form_2  w = new Form_2();
+            w.Show();
         }
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        private void Save_Click(object sender, EventArgs e)
         {
-
+            
+            //sheet.Save();
         }
 
-        private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
+        private void Load_Click(object sender, EventArgs e)
+        {
+            sheet = new SS.Spreadsheet();
+            for (int r = 0; r < 99; r++)
+            {
+                for (int c = 0; c < 26; c++)
+                {
+                    sheet.GetCellValue(getCellName(r, c)).ToString();
+                }
+            }
+        }
+
+        private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
 
         }

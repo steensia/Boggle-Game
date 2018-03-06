@@ -45,16 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="Window.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Window.Designer.cs">
+      <DependentUpon>Window.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Window.resx">
+      <DependentUpon>Window.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -82,6 +82,10 @@
     <ProjectReference Include="..\Formula\Formula.csproj">
       <Project>{D43D998C-9797-4CF4-9BB0-6DE22753849A}</Project>
       <Name>Formula</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpreadsheetPanel\SpreadsheetPanel.csproj">
+      <Project>{F31299DC-288F-4E46-A3AF-6BF461B21C79}</Project>
+      <Name>SpreadsheetPanel</Name>
     </ProjectReference>
     <ProjectReference Include="..\Spreadsheet\Spreadsheet.csproj">
       <Project>{9025A594-DF2A-4E6A-B8C2-F087ECC3E203}</Project>
