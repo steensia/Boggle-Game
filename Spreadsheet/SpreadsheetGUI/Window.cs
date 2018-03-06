@@ -12,6 +12,7 @@ using SS;
 using Formulas;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using SSGui;
+using System.IO;
 
 namespace SpreadsheetGUI
 {
@@ -24,6 +25,13 @@ namespace SpreadsheetGUI
             sheet = new SS.Spreadsheet(new Regex("^[A-Z][1-9][0-9]?$"));
             InitializeComponent();
         }
+
+        public Form_2(TextReader r)
+        {
+            sheet = new SS.Spreadsheet(r, new Regex("^[A-Z][1-9][0-9]?$"));
+            InitializeComponent();
+        }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -93,25 +101,33 @@ namespace SpreadsheetGUI
 
         private void Save_Click(object sender, EventArgs e)
         {
-            
-            //sheet.Save();
+
+            saveFileDialog1.ShowDialog();
         }
 
         private void Load_Click(object sender, EventArgs e)
         {
-            sheet = new SS.Spreadsheet();
-            for (int r = 0; r < 99; r++)
-            {
-                for (int c = 0; c < 26; c++)
-                {
-                    sheet.GetCellValue(getCellName(r, c)).ToString();
-                }
-            }
+            openFileDialog1.ShowDialog();
+            
         }
 
-        private void toolTip1_Popup(object sender, PopupEventArgs e)
+        private void Load_File(object sender, CancelEventArgs e)
         {
+            string file = openFileDialog1.FileName;
+            openFileDialog1.Dispose();
+            TextReader r = new StreamReader(file);
+            Form_2 w = new Form_2(r);
+            r.Close();
+            w.Show();
+        }
 
+        private void Save_File(object sender, CancelEventArgs e)
+        {
+            String file = saveFileDialog1.FileName;
+            saveFileDialog1.Dispose();
+            TextWriter r = new StreamWriter(file);
+            sheet.Save(r);
+            r.Close();
         }
     }
 }

@@ -40,9 +40,12 @@
             this.New = new System.Windows.Forms.ToolStripMenuItem();
             this.Save = new System.Windows.Forms.ToolStripMenuItem();
             this.Open = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.spreadsheetPanel1 = new SSGui.SpreadsheetPanel();
             this.ErrorBox = new System.Windows.Forms.TextBox();
+            this.spreadsheetPanel1 = new SSGui.SpreadsheetPanel();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -113,7 +116,8 @@
             this.menuStrip1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(18, 18);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.File});
+            this.File,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(979, 27);
@@ -154,6 +158,12 @@
             this.Open.Text = "Open";
             this.Open.Click += new System.EventHandler(this.Load_Click);
             // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(49, 23);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -171,6 +181,15 @@
             this.panel1.Size = new System.Drawing.Size(955, 26);
             this.panel1.TabIndex = 8;
             // 
+            // ErrorBox
+            // 
+            this.ErrorBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ErrorBox.Location = new System.Drawing.Point(711, 3);
+            this.ErrorBox.Name = "ErrorBox";
+            this.ErrorBox.ReadOnly = true;
+            this.ErrorBox.Size = new System.Drawing.Size(241, 20);
+            this.ErrorBox.TabIndex = 7;
+            // 
             // spreadsheetPanel1
             // 
             this.spreadsheetPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -183,13 +202,14 @@
             this.spreadsheetPanel1.SelectionChanged += new SSGui.SelectionChangedHandler(this.spreadsheetPanel1_SelectionChanged);
             this.spreadsheetPanel1.Enter += new System.EventHandler(this.Contents_Changed);
             // 
-            // ErrorBox
+            // openFileDialog1
             // 
-            this.ErrorBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ErrorBox.Location = new System.Drawing.Point(711, 3);
-            this.ErrorBox.Name = "ErrorBox";
-            this.ErrorBox.Size = new System.Drawing.Size(241, 20);
-            this.ErrorBox.TabIndex = 7;
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Load_File);
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Save_File);
             // 
             // Form_2
             // 
@@ -228,6 +248,9 @@
         private System.Windows.Forms.ToolStripMenuItem Open;
         private SSGui.SpreadsheetPanel spreadsheetPanel1;
         private System.Windows.Forms.TextBox ErrorBox;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }
 
