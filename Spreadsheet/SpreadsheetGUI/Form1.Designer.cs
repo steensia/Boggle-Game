@@ -41,8 +41,10 @@
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -51,20 +53,24 @@
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.AllowUserToResizeColumns = false;
             this.dataGridView1.AllowUserToResizeRows = false;
+            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 32);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 56);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(828, 446);
+            this.dataGridView1.Size = new System.Drawing.Size(955, 438);
             this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick_1);
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(142, 9);
+            this.label1.Location = new System.Drawing.Point(3, 3);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 15);
             this.label1.TabIndex = 1;
@@ -72,7 +78,7 @@
             // 
             // CellName
             // 
-            this.CellName.Location = new System.Drawing.Point(192, 6);
+            this.CellName.Location = new System.Drawing.Point(53, 0);
             this.CellName.Name = "CellName";
             this.CellName.ReadOnly = true;
             this.CellName.Size = new System.Drawing.Size(43, 20);
@@ -81,7 +87,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(241, 9);
+            this.label2.Location = new System.Drawing.Point(102, 3);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(41, 15);
             this.label2.TabIndex = 3;
@@ -89,16 +95,16 @@
             // 
             // Value
             // 
-            this.Value.Location = new System.Drawing.Point(288, 6);
+            this.Value.Location = new System.Drawing.Point(149, 0);
             this.Value.Name = "Value";
             this.Value.ReadOnly = true;
-            this.Value.Size = new System.Drawing.Size(92, 20);
+            this.Value.Size = new System.Drawing.Size(184, 20);
             this.Value.TabIndex = 4;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(383, 9);
+            this.label3.Location = new System.Drawing.Point(339, 3);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(58, 15);
             this.label3.TabIndex = 5;
@@ -106,20 +112,23 @@
             // 
             // Contents
             // 
-            this.Contents.Location = new System.Drawing.Point(447, 6);
+            this.Contents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Contents.Location = new System.Drawing.Point(403, 0);
             this.Contents.Name = "Contents";
-            this.Contents.Size = new System.Drawing.Size(393, 20);
+            this.Contents.Size = new System.Drawing.Size(552, 20);
             this.Contents.TabIndex = 6;
             this.Contents.TextChanged += new System.EventHandler(this.Contents_Changed);
             // 
             // menuStrip1
             // 
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(18, 18);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.File});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(852, 27);
+            this.menuStrip1.Size = new System.Drawing.Size(979, 27);
             this.menuStrip1.TabIndex = 7;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -151,17 +160,29 @@
             this.openToolStripMenuItem.Size = new System.Drawing.Size(164, 24);
             this.openToolStripMenuItem.Text = "Open";
             // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.Contents);
+            this.panel1.Controls.Add(this.CellName);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.Value);
+            this.panel1.Location = new System.Drawing.Point(12, 30);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(955, 22);
+            this.panel1.TabIndex = 8;
+            // 
             // Form_2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(852, 490);
-            this.Controls.Add(this.Contents);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.Value);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.CellName);
-            this.Controls.Add(this.label1);
+            this.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.ClientSize = new System.Drawing.Size(979, 506);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -171,6 +192,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -190,6 +213,7 @@
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
