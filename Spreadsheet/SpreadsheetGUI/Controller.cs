@@ -26,8 +26,6 @@ namespace SpreadsheetGUI
             this.sheet = new Spreadsheet(new Regex("^[A-Z][1-9][0-9]?$"));
             this.selectedCell = "A1";
             eventSetup();
-            window.NameBox = selectedCell;
-            window.SetCellSelection(getColumn(selectedCell), getRow(selectedCell));
         }
 
         public Controller(IView window, TextReader file)
@@ -36,8 +34,6 @@ namespace SpreadsheetGUI
             this.sheet = new Spreadsheet(file, new Regex("^[A-Z][1-9][0-9]?$"));
             this.selectedCell = "A1";
             eventSetup();
-            window.NameBox = selectedCell;
-            window.SetCellSelection(getColumn(selectedCell), getRow(selectedCell));
         }
 
         private void eventSetup()
@@ -63,6 +59,8 @@ namespace SpreadsheetGUI
                     window.SetCellValue(r, c, sheet.GetCellValue(getCellName(r, c)).ToString());
                 }
             }
+            window.NameBox = selectedCell;
+            window.SetCellSelection(getColumn(selectedCell), getRow(selectedCell));
         }
 
         private void HandleSelectionChanged(int r, int c)
@@ -88,7 +86,10 @@ namespace SpreadsheetGUI
         {
             try
             {
-                sheet.SetContentsOfCell(selectedCell, contents);
+                foreach (String s in sheet.SetContentsOfCell(selectedCell, contents))
+                {
+                    window.SetCellValue(getRow(s), getColumn(s), sheet.GetCellValue(s).ToString());
+                }
                 window.ValueBox = sheet.GetCellValue(selectedCell).ToString();
                 window.ErrorBox = "";
             }
