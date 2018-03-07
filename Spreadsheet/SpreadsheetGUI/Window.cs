@@ -38,88 +38,80 @@ namespace SpreadsheetGUI
         public event Action<string> ContentsChangedEvent;
         public event Action<string> SaveFileEvent;
         public event Action<string> OpenFileEvent;
-        public event Action NewClickEvent;
-        public event Action SaveClickEvent;
-        public event Action OpenClickEvent;
-        public event Action<FormClosingEventArgs> CloseClickEvent;
-        public event Action KeyEvent;
+        public event Action<FormClosingEventArgs> CloseFileEvent;
 
         private void spreadsheetPanel1_SelectionChanged(SpreadsheetPanel sender)
         {
             sender.GetSelection(out int c, out int r);
-            SelectionChangedEvent?.Invoke(r, c);
-        }
-        /*
-                private void spreadsheetPanel1_KeyPress(object sender, KeyPressEventArgs e)
-                {
-
-                    spreadsheetPanel1.GetSelection(out int c, out int r);
-
-                    switch (e.KeyCode)
-                    {
-                        case Keys.Up:
-                            r--;
-                            break;
-                        case Keys.Down:
-                            r++;
-                            break;
-                        case Keys.Left:
-                            c--;
-                            break;
-                        case Keys.Right:
-                            c++;
-                            break;
-                    }
-                    if(r < 0)
-                    {
-                        r = 0;
-                    }
-                    if(c < 0)
-                    {
-                        c = 0;
-                    }
-                    if( r > 99)
-                    {
-                        r = 99;
-                    }
-                    if( c > 25)
-                    {
-                        c = 25;
-                    }
-                    spreadsheetPanel1.SetSelection(c,r);
-                    SelectionChangedEvent?.Invoke(r, c);
-                }
-                */
-
-        private void Contents_Changed(object sender, EventArgs e)
-        {
             ContentsChangedEvent?.Invoke(Content.Text);
+            SelectionChangedEvent?.Invoke(r, c);
+            spreadsheetPanel1.Focus();
+        }
+
+        private void spreadsheetPanel1_KeyPress(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                Content.Focus();
+            }
+            else
+            {
+                spreadsheetPanel1.GetSelection(out int c, out int r);
+                switch (e.KeyData)
+                {
+                    case Keys.Up:
+                        r--;
+                        break;
+                    case Keys.Down:
+                        r++;
+                        break;
+                    case Keys.Left:
+                        c--;
+                        break;
+                    case Keys.Right:
+                        c++;
+                        break;
+                }
+                if (c < 0) c = 0;
+                if (r < 0) r = 0;
+                if (c > 25) c = 25;
+                if (r > 99) r = 99;
+                SetCellSelection(r, c);
+            }      
+        }
+
+        private void Content_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                ContentsChangedEvent?.Invoke(Content.Text);
+                spreadsheetPanel1.Focus();
+            }
         }
 
         private void New_Click(object sender, EventArgs e)
         {
-            NewClickEvent?.Invoke();
+            SpreadsheetApplicationContext.GetContext().RunNew();
         }
 
         private void Save_Click(object sender, EventArgs e)
         {
-            SaveClickEvent?.Invoke();
+            saveFileDialog1.ShowDialog();
         }
 
         private void Open_Click(object sender, EventArgs e)
         {
-            OpenClickEvent?.Invoke();
+            openFileDialog1.ShowDialog();
         }
 
         private void Close_Click(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
-            CloseClickEvent?.Invoke(e);
+            CloseFileEvent?.Invoke(e);
         }
 
         private void Save_File(object sender, CancelEventArgs e)
         {
-
             SaveFileEvent?.Invoke(saveFileDialog1.FileName);
         }
 
@@ -127,6 +119,8 @@ namespace SpreadsheetGUI
         {
             OpenFileEvent?.Invoke(openFileDialog1.FileName);
         }
+
+
 
         public void ShowFileNotSavedDialog(FormClosingEventArgs e)
         {
@@ -139,16 +133,6 @@ namespace SpreadsheetGUI
             }
         }
 
-        public void ShowOpenDialog()
-        {
-            openFileDialog1.ShowDialog();
-        }
-
-        public void ShowSaveDialog()
-        {
-            saveFileDialog1.ShowDialog();
-        }
-
         public void SetCellValue(int r, int c, string value)
         {
             spreadsheetPanel1.SetValue(c, r, value);
@@ -156,12 +140,8 @@ namespace SpreadsheetGUI
 
         public void SetCellSelection(int r, int c)
         {
-            spreadsheetPanel1.SetSelection(c, r);
-        }
-
-        public void OpenNew()
-        {
-            SpreadsheetApplicationContext.GetContext().RunNew();
+            if (spreadsheetPanel1.SetSelection(c, r))
+                SelectionChangedEvent?.Invoke(r, c);
         }
 
         public void OpenNew(TextReader file)

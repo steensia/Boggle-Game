@@ -65,6 +65,7 @@
             // 
             this.CellName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.CellName.BackColor = System.Drawing.SystemColors.Control;
+            this.CellName.Enabled = false;
             this.CellName.Location = new System.Drawing.Point(53, 3);
             this.CellName.Name = "CellName";
             this.CellName.ReadOnly = true;
@@ -82,6 +83,7 @@
             // 
             this.Value.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Value.BackColor = System.Drawing.SystemColors.Control;
+            this.Value.Enabled = false;
             this.Value.Location = new System.Drawing.Point(149, 3);
             this.Value.Name = "Value";
             this.Value.ReadOnly = true;
@@ -107,7 +109,7 @@
             this.Content.Name = "Content";
             this.Content.Size = new System.Drawing.Size(368, 20);
             this.Content.TabIndex = 6;
-            this.Content.TextChanged += new System.EventHandler(this.Contents_Changed);
+            this.Content.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Content_KeyDown);
             // 
             // menuStrip1
             // 
@@ -191,6 +193,7 @@
             // Error
             // 
             this.Error.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Error.Enabled = false;
             this.Error.Location = new System.Drawing.Point(777, 3);
             this.Error.Name = "Error";
             this.Error.ReadOnly = true;
@@ -202,11 +205,13 @@
             this.spreadsheetPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.spreadsheetPanel1.AutoScroll = true;
             this.spreadsheetPanel1.Location = new System.Drawing.Point(12, 72);
             this.spreadsheetPanel1.Name = "spreadsheetPanel1";
             this.spreadsheetPanel1.Size = new System.Drawing.Size(955, 422);
             this.spreadsheetPanel1.TabIndex = 9;
             this.spreadsheetPanel1.SelectionChanged += new SSGui.SelectionChangedHandler(this.spreadsheetPanel1_SelectionChanged);
+            this.spreadsheetPanel1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.spreadsheetPanel1_KeyPress);
             // 
             // openFileDialog1
             // 

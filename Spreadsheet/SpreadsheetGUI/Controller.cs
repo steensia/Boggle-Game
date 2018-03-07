@@ -41,14 +41,10 @@ namespace SpreadsheetGUI
             window.LoadSpreadsheetEvent += HandleLoadSpreadsheet;
             window.SelectionChangedEvent += HandleSelectionChanged;
             window.ContentsChangedEvent += HandleContentsChanged;
-            window.NewClickEvent += HandleNewClick;
-            window.SaveClickEvent += HandleSaveClick;
-            window.OpenClickEvent += HandleOpenClick;
-            window.CloseClickEvent += HandleCloseClick;
+            window.CloseFileEvent += HandleCloseFile;
             window.SaveFileEvent += HandleSaveFile;
             window.OpenFileEvent += HandleOpenFile;
         }
-
 
         private void HandleLoadSpreadsheet()
         {
@@ -65,31 +61,26 @@ namespace SpreadsheetGUI
 
         private void HandleSelectionChanged(int r, int c)
         {
-            if (c >= 0 && r >= 0)
+            selectedCell = getCellName(r, c);
+            window.ValueBox = sheet.GetCellValue(selectedCell).ToString();
+            object o = sheet.GetCellContents(selectedCell);
+            if (o is Formula)
             {
-                selectedCell = getCellName(r, c);
-                window.ValueBox = sheet.GetCellValue(selectedCell).ToString();
-                object o = sheet.GetCellContents(selectedCell);
-                if (o is Formula)
-                {
-                    window.ContentBox = "=" + o.ToString();
-                }
-                else
-                {
-                    window.ContentBox = o.ToString();
-                }
-                window.NameBox = selectedCell;
+                window.ContentBox = "=" + o.ToString();
             }
+            else
+            {
+                window.ContentBox = o.ToString();
+            }
+            window.NameBox = selectedCell;
         }
 
         private void HandleContentsChanged(String contents)
         {
             try
             {
-                foreach (String s in sheet.SetContentsOfCell(selectedCell, contents))
-                {
-                    window.SetCellValue(getRow(s), getColumn(s), sheet.GetCellValue(s).ToString());
-                }
+                foreach (string s in sheet.SetContentsOfCell(selectedCell, contents))
+                    window.SetCellValue(getRow(s), getColumn(s), sheet.GetCellValue(s).ToString());         
                 window.ValueBox = sheet.GetCellValue(selectedCell).ToString();
                 window.ErrorBox = "";
             }
@@ -97,32 +88,9 @@ namespace SpreadsheetGUI
             {
                 window.ErrorBox = ex.GetType().ToString();
             }
-
-            for (int r = 0; r < 99; r++)
-            {
-                for (int c = 0; c < 26; c++)
-                {
-                    window.SetCellValue(r, c, sheet.GetCellValue(getCellName(r, c)).ToString());
-                }
-            }
         }
 
-        private void HandleNewClick()
-        {
-            window.OpenNew();
-        }
-
-        private void HandleSaveClick()
-        {
-            window.ShowSaveDialog();
-        }
-
-        private void HandleOpenClick()
-        {
-            window.ShowOpenDialog();
-        }
-
-        private void HandleCloseClick(FormClosingEventArgs e)
+        private void HandleCloseFile(FormClosingEventArgs e)
         {
             if (sheet.Changed)
             {
@@ -160,8 +128,8 @@ namespace SpreadsheetGUI
 
         private int getRow(string name)
         {
-            int.TryParse(name.Substring(1, name.Length - 2), out int row);
-            return row - 1;
+            int.TryParse(name.Substring(1, name.Length - 1), out int row);
+            return row -1;
         }
     }
 }
