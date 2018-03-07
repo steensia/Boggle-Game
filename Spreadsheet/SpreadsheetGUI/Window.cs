@@ -16,125 +16,157 @@ using System.IO;
 
 namespace SpreadsheetGUI
 {
-    public partial class Form_2 : Form
+    public partial class Window : Form, IView
     {
-        private SS.Spreadsheet sheet;
-        private string selectedCell;
-        public Form_2()
+        public string NameBox { set => CellName.Text = value; }
+        public string ContentBox { set => Content.Text = value; }
+        public string ValueBox { set => Value.Text = value; }
+        string IView.ErrorBox { set => Error.Text = value; }
+
+        public Window()
         {
-            sheet = new SS.Spreadsheet(new Regex("^[A-Z][1-9][0-9]?$"));
             InitializeComponent();
         }
-
-        public Form_2(TextReader r)
-        {
-            sheet = new SS.Spreadsheet(r, new Regex("^[A-Z][1-9][0-9]?$"));
-            InitializeComponent();
-        }
-
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            for (int r = 0; r < 99; r++)
-            {
-                for (int c = 0; c < 26; c++)
-                {
-                    spreadsheetPanel1.SetValue(c, r, sheet.GetCellValue(getCellName(r, c)).ToString());
-                }
-            }
-            selectedCell = "A1";
-            spreadsheetPanel1_SelectionChanged(spreadsheetPanel1);
+            LoadSpreadsheetEvent?.Invoke();
         }
+
+        public event Action LoadSpreadsheetEvent;
+        public event Action<int, int> SelectionChangedEvent;
+        public event Action<string> ContentsChangedEvent;
+        public event Action<string> SaveFileEvent;
+        public event Action<string> OpenFileEvent;
+        public event Action NewClickEvent;
+        public event Action SaveClickEvent;
+        public event Action OpenClickEvent;
+        public event Action<FormClosingEventArgs> CloseClickEvent;
+        public event Action KeyEvent;
 
         private void spreadsheetPanel1_SelectionChanged(SpreadsheetPanel sender)
         {
             sender.GetSelection(out int c, out int r);
-            if (c >= 0 && r >= 0)
-            {
-                selectedCell = getCellName(r, c);
-                Value.Text = sheet.GetCellValue(selectedCell).ToString();
-                object o = sheet.GetCellContents(selectedCell);
-                if (o is Formula)
-                {
-                    Contents.Text = "=" + o.ToString();
-                }
-                else
-                {
-                    Contents.Text = o.ToString();
-                }
-                CellName.Text = selectedCell;
-            }
+            SelectionChangedEvent?.Invoke(r, c);
         }
+        /*
+                private void spreadsheetPanel1_KeyPress(object sender, KeyPressEventArgs e)
+                {
+
+                    spreadsheetPanel1.GetSelection(out int c, out int r);
+
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Up:
+                            r--;
+                            break;
+                        case Keys.Down:
+                            r++;
+                            break;
+                        case Keys.Left:
+                            c--;
+                            break;
+                        case Keys.Right:
+                            c++;
+                            break;
+                    }
+                    if(r < 0)
+                    {
+                        r = 0;
+                    }
+                    if(c < 0)
+                    {
+                        c = 0;
+                    }
+                    if( r > 99)
+                    {
+                        r = 99;
+                    }
+                    if( c > 25)
+                    {
+                        c = 25;
+                    }
+                    spreadsheetPanel1.SetSelection(c,r);
+                    SelectionChangedEvent?.Invoke(r, c);
+                }
+                */
 
         private void Contents_Changed(object sender, EventArgs e)
         {
-            try
-            {
-                sheet.SetContentsOfCell(selectedCell, Contents.Text);
-                Value.Text = sheet.GetCellValue(selectedCell).ToString();
-                ErrorBox.Text = "";
-            }
-            catch (Exception ex)
-            {
-                ErrorBox.Text = ex.ToString();
-            }
-
-            for (int r = 0; r < 99; r++)
-            {
-                for (int c = 0; c < 26; c++)
-                {
-                    spreadsheetPanel1.SetValue(c, r, sheet.GetCellValue(getCellName(r, c)).ToString());
-                }
-            }
-        }
-
-        private string getCellName(int r, int c)
-        {
-            return "" + (char)('A' + c) + (r + 1);
+            ContentsChangedEvent?.Invoke(Content.Text);
         }
 
         private void New_Click(object sender, EventArgs e)
         {
-            Form_2  w = new Form_2();
-            
-            
-            
-            w.Show();
+            NewClickEvent?.Invoke();
         }
 
         private void Save_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.ShowDialog();
+            SaveClickEvent?.Invoke();
         }
 
-        private void Load_Click(object sender, EventArgs e)
+        private void Open_Click(object sender, EventArgs e)
         {
-            openFileDialog1.ShowDialog();
-            
+            OpenClickEvent?.Invoke();
         }
 
-        private void Load_File(object sender, CancelEventArgs e)
+        private void Close_Click(object sender, FormClosingEventArgs e)
         {
-            string file = openFileDialog1.FileName;
-            openFileDialog1.Dispose();
-            TextReader r = new StreamReader(file);
-            Form_2 w = new Form_2(r);
-            r.Close();
-            w.Show();
+            e.Cancel = true;
+            CloseClickEvent?.Invoke(e);
         }
 
         private void Save_File(object sender, CancelEventArgs e)
         {
-            String file = saveFileDialog1.FileName;
-            saveFileDialog1.Dispose();
-            TextWriter r = new StreamWriter(file);
-            sheet.Save(r);
-            r.Close();
+
+            SaveFileEvent?.Invoke(saveFileDialog1.FileName);
         }
 
-        private void Form_2_FormClosing(object sender, FormClosingEventArgs e)
+        private void Open_File(object sender, CancelEventArgs e)
         {
+            OpenFileEvent?.Invoke(openFileDialog1.FileName);
+        }
 
+        public void ShowFileNotSavedDialog(FormClosingEventArgs e)
+        {
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            DialogResult result;
+            result = MessageBox.Show("This file has not been save, would you still like to continue?", "File not saved", buttons);
+            if (result == DialogResult.Yes)
+            {
+                e.Cancel = false;
+            }
+        }
+
+        public void ShowOpenDialog()
+        {
+            openFileDialog1.ShowDialog();
+        }
+
+        public void ShowSaveDialog()
+        {
+            saveFileDialog1.ShowDialog();
+        }
+
+        public void SetCellValue(int r, int c, string value)
+        {
+            spreadsheetPanel1.SetValue(c, r, value);
+        }
+
+        public void SetCellSelection(int r, int c)
+        {
+            spreadsheetPanel1.SetSelection(c, r);
+        }
+
+        public void OpenNew()
+        {
+            SpreadsheetApplicationContext.GetContext().RunNew();
+        }
+
+        public void OpenNew(TextReader file)
+        {
+            SpreadsheetApplicationContext.GetContext().RunNew(file);
         }
     }
 }
