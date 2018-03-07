@@ -112,6 +112,17 @@ namespace SSGui
             return drawingPanel.SetSelection(col, row);
         }
 
+         /// <summary>
+        /// Blocks this SpreadsheetPanel from giving special interpretations to certain
+        /// keys, such as the arrow keys and the tab key.
+        /// </summary>
+        /// <param name="keyData"></param>
+        /// <returns></returns>
+        protected override bool IsInputKey(Keys keyData)
+        {
+            return true;
+        }
+
         /// <summary>
         /// Assigns the column and row of the current selection to the
         /// out parameters.
