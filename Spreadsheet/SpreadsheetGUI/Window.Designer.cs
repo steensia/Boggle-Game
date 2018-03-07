@@ -74,7 +74,7 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(102, 6);
+            this.label2.Location = new System.Drawing.Point(219, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(41, 15);
             this.label2.TabIndex = 3;
@@ -174,7 +174,6 @@
             this.panel1.Controls.Add(this.Contents);
             this.panel1.Controls.Add(this.CellName);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.Value);
             this.panel1.Location = new System.Drawing.Point(12, 40);
             this.panel1.Name = "panel1";
@@ -200,7 +199,6 @@
             this.spreadsheetPanel1.Size = new System.Drawing.Size(955, 422);
             this.spreadsheetPanel1.TabIndex = 9;
             this.spreadsheetPanel1.SelectionChanged += new SSGui.SelectionChangedHandler(this.spreadsheetPanel1_SelectionChanged);
-            this.spreadsheetPanel1.Enter += new System.EventHandler(this.Contents_Changed);
             // 
             // openFileDialog1
             // 
@@ -220,9 +218,11 @@
             this.Controls.Add(this.spreadsheetPanel1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.label2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form_2";
             this.Text = "Spreadsheet";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_2_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

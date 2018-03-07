@@ -96,12 +96,14 @@ namespace SpreadsheetGUI
         private void New_Click(object sender, EventArgs e)
         {
             Form_2  w = new Form_2();
+            
+            
+            
             w.Show();
         }
 
         private void Save_Click(object sender, EventArgs e)
         {
-
             saveFileDialog1.ShowDialog();
         }
 
@@ -128,6 +130,11 @@ namespace SpreadsheetGUI
             TextWriter r = new StreamWriter(file);
             sheet.Save(r);
             r.Close();
+        }
+
+        private void Form_2_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
     }
 }
