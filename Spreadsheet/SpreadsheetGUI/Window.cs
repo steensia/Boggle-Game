@@ -120,7 +120,10 @@ namespace SpreadsheetGUI
             OpenFileEvent?.Invoke(openFileDialog1.FileName);
         }
 
-
+        private void Help_Click(object sender, EventArgs e)
+        {
+           
+        }
 
         public void ShowFileNotSavedDialog(FormClosingEventArgs e)
         {
