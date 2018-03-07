@@ -1,6 +1,6 @@
 ﻿namespace SpreadsheetGUI
 {
-    partial class Form_2
+    partial class Window
     {
         /// <summary>
         /// Required designer variable.
@@ -28,13 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_2));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Window));
             this.label1 = new System.Windows.Forms.Label();
             this.CellName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.Value = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.Contents = new System.Windows.Forms.TextBox();
+            this.Content = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.File = new System.Windows.Forms.ToolStripMenuItem();
             this.New = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +42,8 @@
             this.Open = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.ErrorBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.Error = new System.Windows.Forms.TextBox();
             this.spreadsheetPanel1 = new SSGui.SpreadsheetPanel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -72,13 +73,10 @@
             // 
             // label2
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(219, 9);
+            this.label2.Location = new System.Drawing.Point(0, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(41, 15);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Value:";
+            this.label2.Size = new System.Drawing.Size(100, 23);
+            this.label2.TabIndex = 10;
             // 
             // Value
             // 
@@ -100,16 +98,16 @@
             this.label3.TabIndex = 5;
             this.label3.Text = "Contents:";
             // 
-            // Contents
+            // Content
             // 
-            this.Contents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.Content.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.Contents.BackColor = System.Drawing.SystemColors.HighlightText;
-            this.Contents.Location = new System.Drawing.Point(403, 3);
-            this.Contents.Name = "Contents";
-            this.Contents.Size = new System.Drawing.Size(302, 20);
-            this.Contents.TabIndex = 6;
-            this.Contents.TextChanged += new System.EventHandler(this.Contents_Changed);
+            this.Content.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.Content.Location = new System.Drawing.Point(403, 3);
+            this.Content.Name = "Content";
+            this.Content.Size = new System.Drawing.Size(368, 20);
+            this.Content.TabIndex = 6;
+            this.Content.TextChanged += new System.EventHandler(this.Contents_Changed);
             // 
             // menuStrip1
             // 
@@ -156,7 +154,7 @@
             this.Open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.Open.Size = new System.Drawing.Size(166, 24);
             this.Open.Text = "Open";
-            this.Open.Click += new System.EventHandler(this.Load_Click);
+            this.Open.Click += new System.EventHandler(this.Open_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -169,9 +167,10 @@
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.panel1.Controls.Add(this.ErrorBox);
+            this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.Error);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.Contents);
+            this.panel1.Controls.Add(this.Content);
             this.panel1.Controls.Add(this.CellName);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.Value);
@@ -180,14 +179,23 @@
             this.panel1.Size = new System.Drawing.Size(955, 26);
             this.panel1.TabIndex = 8;
             // 
-            // ErrorBox
+            // label4
             // 
-            this.ErrorBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ErrorBox.Location = new System.Drawing.Point(711, 3);
-            this.ErrorBox.Name = "ErrorBox";
-            this.ErrorBox.ReadOnly = true;
-            this.ErrorBox.Size = new System.Drawing.Size(241, 20);
-            this.ErrorBox.TabIndex = 7;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(102, 6);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(41, 15);
+            this.label4.TabIndex = 8;
+            this.label4.Text = "Value:";
+            // 
+            // Error
+            // 
+            this.Error.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Error.Location = new System.Drawing.Point(777, 3);
+            this.Error.Name = "Error";
+            this.Error.ReadOnly = true;
+            this.Error.Size = new System.Drawing.Size(175, 20);
+            this.Error.TabIndex = 7;
             // 
             // spreadsheetPanel1
             // 
@@ -203,13 +211,13 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Load_File);
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Open_File);
             // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Save_File);
             // 
-            // Form_2
+            // Window
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -220,9 +228,9 @@
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.label2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form_2";
+            this.Name = "Window";
             this.Text = "Spreadsheet";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_2_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Close_Click);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -239,7 +247,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox Value;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox Contents;
+        private System.Windows.Forms.TextBox Content;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem File;
         private System.Windows.Forms.Panel panel1;
@@ -247,10 +255,11 @@
         private System.Windows.Forms.ToolStripMenuItem Save;
         private System.Windows.Forms.ToolStripMenuItem Open;
         private SSGui.SpreadsheetPanel spreadsheetPanel1;
-        private System.Windows.Forms.TextBox ErrorBox;
+        private System.Windows.Forms.TextBox Error;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.Label label4;
     }
 }
 
