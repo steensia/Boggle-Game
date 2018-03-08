@@ -1,6 +1,6 @@
 ﻿namespace SpreadsheetGUI
 {
-    partial class Window
+    partial class SpreadsheetWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Window));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SpreadsheetWindow));
             this.label1 = new System.Windows.Forms.Label();
             this.CellName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();

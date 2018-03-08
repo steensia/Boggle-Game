@@ -16,14 +16,14 @@ using System.IO;
 
 namespace SpreadsheetGUI
 {
-    public partial class Window : Form, IView
+    public partial class SpreadsheetWindow : Form, ISpreadsheetView
     {
         public string NameBox { set => CellName.Text = value; }
         public string ContentBox { set => Content.Text = value; }
         public string ValueBox { set => Value.Text = value; }
-        string IView.ErrorBox { set => Error.Text = value; }
+        string ISpreadsheetView.ErrorBox { set => Error.Text = value; }
 
-        public Window()
+        public SpreadsheetWindow()
         {
             InitializeComponent();
         }

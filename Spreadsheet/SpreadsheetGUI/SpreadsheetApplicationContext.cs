@@ -25,7 +25,7 @@ namespace SpreadsheetGUI
 
         public void RunNew()
         {
-            Window window = new Window();
+            SpreadsheetWindow window = new SpreadsheetWindow();
             new Controller(window);
 
             windows++;
@@ -37,7 +37,7 @@ namespace SpreadsheetGUI
 
         public void RunNew(TextReader file)
         {
-            Window window = new Window();
+            SpreadsheetWindow window = new SpreadsheetWindow();
             new Controller(window, file);
 
             windows++;

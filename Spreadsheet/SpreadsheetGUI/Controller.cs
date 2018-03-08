@@ -14,13 +14,13 @@ namespace SpreadsheetGUI
 {
     public class Controller
     {
-        private IView window;
+        private ISpreadsheetView window;
 
         private Spreadsheet sheet;
 
         private string selectedCell;
 
-        public Controller(IView window)
+        public Controller(ISpreadsheetView window)
         {
             this.window = window;
             this.sheet = new Spreadsheet(new Regex("^[A-Z][1-9][0-9]?$"));
@@ -28,7 +28,7 @@ namespace SpreadsheetGUI
             eventSetup();
         }
 
-        public Controller(IView window, TextReader file)
+        public Controller(ISpreadsheetView window, TextReader file)
         {
             this.window = window;
             this.sheet = new Spreadsheet(file, new Regex("^[A-Z][1-9][0-9]?$"));
@@ -92,6 +92,7 @@ namespace SpreadsheetGUI
 
         private void HandleCloseFile(FormClosingEventArgs e)
         {
+            e.Cancel = true;
             if (sheet.Changed)
             {
                 window.ShowFileNotSavedDialog(e);

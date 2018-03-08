@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace SpreadsheetGUI
 {
-    public interface IView
+    public interface ISpreadsheetView
     {
         event Action LoadSpreadsheetEvent;
 
