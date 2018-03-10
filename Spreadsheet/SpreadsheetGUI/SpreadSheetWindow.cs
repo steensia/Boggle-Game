@@ -37,6 +37,7 @@ namespace SpreadsheetGUI
         public event Action<int, int> SelectionChangedEvent;
         public event Action<string> ContentsChangedEvent;
         public event Action<string> SaveFileEvent;
+        public event Action SaveEvent;
         public event Action<string> OpenFileEvent;
         public event Action<FormClosingEventArgs> CloseFileEvent;
 
@@ -93,10 +94,9 @@ namespace SpreadsheetGUI
         {
             SpreadsheetApplicationContext.GetContext().RunNew();
         }
-
         private void Save_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.ShowDialog();
+           SaveEvent?.Invoke();
         }
 
         private void Open_Click(object sender, EventArgs e)
@@ -120,9 +120,9 @@ namespace SpreadsheetGUI
             OpenFileEvent?.Invoke(openFileDialog1.FileName);
         }
 
-        private void Help_Click(object sender, EventArgs e)
+        public void ShowSaveDialog()
         {
-           
+            saveFileDialog1.ShowDialog();
         }
 
         public void ShowFileNotSavedDialog(FormClosingEventArgs e)
@@ -150,6 +150,29 @@ namespace SpreadsheetGUI
         public void OpenNew(TextReader file)
         {
             SpreadsheetApplicationContext.GetContext().RunNew(file);
+        }
+
+        private void Help_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("How to navigate: \n" +
+                                "\t Use arrow keys or mouse to navigate \n" +
+                            "How to add a cell: \n" +
+                                "\tPress enter or click on a cell to register contents\n" +
+                            "How to use File Menu: \n" +
+                                "\t Click File > New or Ctrl + N to open a new window \n" +
+                                "\t Click File > Save or Ctrl + S to save a file \n" +
+                                "\t Click File > Save as or Ctrl + Alt + S to save or overwrite a file\n" +
+                                "\t Click File > Exit or Ctrl + W or X to exit the window ", "Help Box");
+        }
+
+        private void SaveAs_Click(object sender, EventArgs e)
+        {
+                saveFileDialog1.ShowDialog();
+        }
+
+        private void MenuClose_Click(object sender, EventArgs e)
+        {
+                Close();
         }
     }
 }

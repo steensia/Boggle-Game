@@ -18,7 +18,10 @@ namespace SpreadsheetGUI
         event Action<string> ContentsChangedEvent;
 
         event Action<string> SaveFileEvent;
+
         event Action<string> OpenFileEvent;
+
+        event Action SaveEvent;
 
         event Action<FormClosingEventArgs> CloseFileEvent;
 
@@ -27,6 +30,7 @@ namespace SpreadsheetGUI
         string ValueBox { set; }
         string ErrorBox { set; }
 
+        void ShowSaveDialog();
         void ShowFileNotSavedDialog(FormClosingEventArgs e);
         void SetCellSelection(int r, int c);
         void SetCellValue(int r, int c, string value);

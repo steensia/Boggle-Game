@@ -16,6 +16,7 @@ namespace SpreadsheetTester
         public bool CalledSetCellSelection { get; private set; }
         public bool CalledSetCellValue { get; private set; }
         public bool CalledShowFileNotSavedDialog { get; private set; }
+        public bool CalledShowSaveDialog { get; private set; }
 
         // These methods cause events to be fired
         public void FireLoadSpreadsheetEvent() // do
@@ -29,6 +30,10 @@ namespace SpreadsheetTester
         public void FireContentsChangedEvent(string s) // do
         {
             if (ContentsChangedEvent != null) ContentsChangedEvent(s);
+        }
+        public void FireSaveEvent()
+        {
+            if (SaveEvent != null) SaveEvent();
         }
         public void FireSaveFileEvent(string s) // do
         {
@@ -56,6 +61,7 @@ namespace SpreadsheetTester
         public event Action<string> SaveFileEvent;
         public event Action<string> OpenFileEvent;
         public event Action<FormClosingEventArgs> CloseFileEvent;
+        public event Action SaveEvent;
 
         // These methods implement the interface and change respective properties
         public void ShowFileNotSavedDialog(FormClosingEventArgs e)
@@ -76,6 +82,11 @@ namespace SpreadsheetTester
         public void OpenNew(TextReader file)
         {
             CalledOpenNew = true;
+        }
+
+        public void ShowSaveDialog()
+        {
+            CalledShowSaveDialog = true;
         }
     }
 }

@@ -20,11 +20,14 @@ namespace SpreadsheetGUI
 
         private string selectedCell;
 
+        private string previousFile;
+
         public Controller(ISpreadsheetView window)
         {
             this.window = window;
             this.sheet = new Spreadsheet(new Regex("^[A-Z][1-9][0-9]?$"));
             this.selectedCell = "A1";
+            this.previousFile = null;
             eventSetup();
         }
 
@@ -33,6 +36,7 @@ namespace SpreadsheetGUI
             this.window = window;
             this.sheet = new Spreadsheet(file, new Regex("^[A-Z][1-9][0-9]?$"));
             this.selectedCell = "A1";
+            this.previousFile = file.ToString();
             eventSetup();
         }
 
@@ -43,6 +47,7 @@ namespace SpreadsheetGUI
             window.ContentsChangedEvent += HandleContentsChanged;
             window.CloseFileEvent += HandleCloseFile;
             window.SaveFileEvent += HandleSaveFile;
+            window.SaveEvent += HandleSave;
             window.OpenFileEvent += HandleOpenFile;
         }
 
@@ -77,14 +82,16 @@ namespace SpreadsheetGUI
 
         private void HandleContentsChanged(String contents)
         {
+            string temp = (sheet.GetCellContents(selectedCell) is Formula) ? "=" : "" + sheet.GetCellContents(selectedCell).ToString();
+            if (contents.Equals(temp)) return;
             try
             {
                 foreach (string s in sheet.SetContentsOfCell(selectedCell, contents))
-                    window.SetCellValue(getRow(s), getColumn(s), sheet.GetCellValue(s).ToString());         
+                    window.SetCellValue(getRow(s), getColumn(s), sheet.GetCellValue(s).ToString());
                 window.ValueBox = sheet.GetCellValue(selectedCell).ToString();
                 window.ErrorBox = "";
             }
-            catch (Exception ex)
+            catch (Exception ex)    
             {
                 window.ErrorBox = ex.GetType().ToString();
             }
@@ -106,8 +113,23 @@ namespace SpreadsheetGUI
         private void HandleSaveFile(String fileName)
         {
             TextWriter r = new StreamWriter(fileName);
+            previousFile = fileName;
             sheet.Save(r);
             r.Close();
+        }
+
+        private void HandleSave()
+        {
+            if (previousFile == null)
+            {
+                window.ShowSaveDialog();
+            }
+            else
+            {
+                TextWriter r = new StreamWriter(previousFile);
+                sheet.Save(r);
+                r.Close();
+            }
         }
 
         private void HandleOpenFile(String fileName)
