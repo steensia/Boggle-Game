@@ -253,6 +253,7 @@
             // 
             // saveFileDialog1
             // 
+            this.saveFileDialog1.DefaultExt = "ss";
             this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.Save_File);
             // 
             // SpreadsheetWindow
