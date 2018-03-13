@@ -42,6 +42,7 @@ namespace BoggleClient
         {
             UsernameBox.Enabled = false;
             DomainBox.Enabled = false;
+            RegisterButton.Enabled = false;
             RegisterEvent?.Invoke(UsernameBox.Text, DomainBox.Text);
         }
 
@@ -49,6 +50,7 @@ namespace BoggleClient
         {
             UsernameBox.Enabled = true;
             DomainBox.Enabled = true;
+            RegisterButton.Enabled = true;
             CancelRegisterEvent?.Invoke();
         }
 
@@ -107,6 +109,26 @@ namespace BoggleClient
                     BoggleBoard.SetValue(i,j,""+board[i][j]);
                 }
             }         
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void WordBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TimerBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

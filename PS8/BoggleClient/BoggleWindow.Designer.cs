@@ -46,20 +46,25 @@
             this.WordBoxLabel = new System.Windows.Forms.Label();
             this.WordList = new System.Windows.Forms.RichTextBox();
             this.BoggleBoard = new SSGui.SpreadsheetPanel();
+            this.WordsListLable = new System.Windows.Forms.Label();
+            this.Player2Label = new System.Windows.Forms.Label();
+            this.Player2UsernameBox = new System.Windows.Forms.TextBox();
+            this.Player2ScoreLable = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // UsernameBox
             // 
-            this.UsernameBox.Location = new System.Drawing.Point(86, 30);
+            this.UsernameBox.Location = new System.Drawing.Point(86, 57);
             this.UsernameBox.Name = "UsernameBox";
-            this.UsernameBox.Size = new System.Drawing.Size(100, 20);
+            this.UsernameBox.Size = new System.Drawing.Size(179, 20);
             this.UsernameBox.TabIndex = 0;
             // 
             // UsernameLabel
             // 
             this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(12, 33);
+            this.UsernameLabel.Location = new System.Drawing.Point(12, 60);
             this.UsernameLabel.Name = "UsernameLabel";
             this.UsernameLabel.Size = new System.Drawing.Size(68, 15);
             this.UsernameLabel.TabIndex = 1;
@@ -67,9 +72,9 @@
             // 
             // CancelButton
             // 
-            this.CancelButton.Location = new System.Drawing.Point(499, 28);
+            this.CancelButton.Location = new System.Drawing.Point(379, 57);
             this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(75, 23);
+            this.CancelButton.Size = new System.Drawing.Size(102, 23);
             this.CancelButton.TabIndex = 2;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
@@ -77,9 +82,9 @@
             // 
             // RegisterButton
             // 
-            this.RegisterButton.Location = new System.Drawing.Point(418, 28);
+            this.RegisterButton.Location = new System.Drawing.Point(271, 57);
             this.RegisterButton.Name = "RegisterButton";
-            this.RegisterButton.Size = new System.Drawing.Size(75, 23);
+            this.RegisterButton.Size = new System.Drawing.Size(102, 23);
             this.RegisterButton.TabIndex = 3;
             this.RegisterButton.Text = "Register";
             this.RegisterButton.UseVisualStyleBackColor = true;
@@ -87,15 +92,15 @@
             // 
             // DomainBox
             // 
-            this.DomainBox.Location = new System.Drawing.Point(254, 30);
+            this.DomainBox.Location = new System.Drawing.Point(72, 31);
             this.DomainBox.Name = "DomainBox";
-            this.DomainBox.Size = new System.Drawing.Size(158, 20);
+            this.DomainBox.Size = new System.Drawing.Size(623, 20);
             this.DomainBox.TabIndex = 4;
             // 
             // DomainLabel
             // 
             this.DomainLabel.AutoSize = true;
-            this.DomainLabel.Location = new System.Drawing.Point(194, 33);
+            this.DomainLabel.Location = new System.Drawing.Point(12, 33);
             this.DomainLabel.Name = "DomainLabel";
             this.DomainLabel.Size = new System.Drawing.Size(54, 15);
             this.DomainLabel.TabIndex = 5;
@@ -103,16 +108,17 @@
             // 
             // TimerBox
             // 
-            this.TimerBox.Location = new System.Drawing.Point(639, 30);
+            this.TimerBox.Location = new System.Drawing.Point(271, 86);
             this.TimerBox.Name = "TimerBox";
-            this.TimerBox.Size = new System.Drawing.Size(100, 20);
+            this.TimerBox.Size = new System.Drawing.Size(63, 20);
             this.TimerBox.TabIndex = 6;
+            this.TimerBox.TextChanged += new System.EventHandler(this.TimerBox_TextChanged);
             this.TimerBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.StartGame);
             // 
             // TimerLabel
             // 
             this.TimerLabel.AutoSize = true;
-            this.TimerLabel.Location = new System.Drawing.Point(595, 33);
+            this.TimerLabel.Location = new System.Drawing.Point(227, 89);
             this.TimerLabel.Name = "TimerLabel";
             this.TimerLabel.Size = new System.Drawing.Size(38, 15);
             this.TimerLabel.TabIndex = 7;
@@ -120,7 +126,7 @@
             // 
             // RequestButton
             // 
-            this.RequestButton.Location = new System.Drawing.Point(15, 131);
+            this.RequestButton.Location = new System.Drawing.Point(487, 112);
             this.RequestButton.Name = "RequestButton";
             this.RequestButton.Size = new System.Drawing.Size(102, 23);
             this.RequestButton.TabIndex = 8;
@@ -130,7 +136,7 @@
             // 
             // CancelRequestButton
             // 
-            this.CancelRequestButton.Location = new System.Drawing.Point(123, 131);
+            this.CancelRequestButton.Location = new System.Drawing.Point(595, 112);
             this.CancelRequestButton.Name = "CancelRequestButton";
             this.CancelRequestButton.Size = new System.Drawing.Size(102, 23);
             this.CancelRequestButton.TabIndex = 9;
@@ -140,12 +146,13 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(18, 18);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(780, 27);
+            this.menuStrip1.Size = new System.Drawing.Size(707, 27);
             this.menuStrip1.TabIndex = 11;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -159,7 +166,7 @@
             // ScoreLabel
             // 
             this.ScoreLabel.AutoSize = true;
-            this.ScoreLabel.Location = new System.Drawing.Point(595, 59);
+            this.ScoreLabel.Location = new System.Drawing.Point(12, 86);
             this.ScoreLabel.Name = "ScoreLabel";
             this.ScoreLabel.Size = new System.Drawing.Size(42, 15);
             this.ScoreLabel.TabIndex = 13;
@@ -168,24 +175,25 @@
             // ScoreBox
             // 
             this.ScoreBox.Enabled = false;
-            this.ScoreBox.Location = new System.Drawing.Point(639, 56);
+            this.ScoreBox.Location = new System.Drawing.Point(60, 83);
             this.ScoreBox.Name = "ScoreBox";
             this.ScoreBox.ReadOnly = true;
-            this.ScoreBox.Size = new System.Drawing.Size(100, 20);
+            this.ScoreBox.Size = new System.Drawing.Size(161, 20);
             this.ScoreBox.TabIndex = 14;
             // 
             // WordBox
             // 
-            this.WordBox.Location = new System.Drawing.Point(94, 488);
+            this.WordBox.Location = new System.Drawing.Point(97, 439);
             this.WordBox.Name = "WordBox";
-            this.WordBox.Size = new System.Drawing.Size(240, 20);
+            this.WordBox.Size = new System.Drawing.Size(237, 20);
             this.WordBox.TabIndex = 15;
+            this.WordBox.TextChanged += new System.EventHandler(this.WordBox_TextChanged);
             this.WordBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.WordBox_KeyDown);
             // 
             // WordBoxLabel
             // 
             this.WordBoxLabel.AutoSize = true;
-            this.WordBoxLabel.Location = new System.Drawing.Point(9, 491);
+            this.WordBoxLabel.Location = new System.Drawing.Point(12, 442);
             this.WordBoxLabel.Name = "WordBoxLabel";
             this.WordBoxLabel.Size = new System.Drawing.Size(79, 15);
             this.WordBoxLabel.TabIndex = 16;
@@ -194,26 +202,75 @@
             // WordList
             // 
             this.WordList.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.WordList.Location = new System.Drawing.Point(355, 160);
+            this.WordList.Location = new System.Drawing.Point(343, 111);
             this.WordList.Name = "WordList";
             this.WordList.ReadOnly = true;
-            this.WordList.Size = new System.Drawing.Size(138, 322);
+            this.WordList.Size = new System.Drawing.Size(138, 348);
             this.WordList.TabIndex = 17;
             this.WordList.Text = "";
             // 
             // BoggleBoard
             // 
             this.BoggleBoard.Enabled = false;
-            this.BoggleBoard.Location = new System.Drawing.Point(15, 160);
+            this.BoggleBoard.Location = new System.Drawing.Point(12, 111);
             this.BoggleBoard.Name = "BoggleBoard";
             this.BoggleBoard.Size = new System.Drawing.Size(322, 322);
             this.BoggleBoard.TabIndex = 18;
+            // 
+            // WordsListLable
+            // 
+            this.WordsListLable.AutoSize = true;
+            this.WordsListLable.Location = new System.Drawing.Point(387, 93);
+            this.WordsListLable.Name = "WordsListLable";
+            this.WordsListLable.Size = new System.Drawing.Size(42, 15);
+            this.WordsListLable.TabIndex = 22;
+            this.WordsListLable.Text = "Words";
+            this.WordsListLable.Click += new System.EventHandler(this.label4_Click);
+            // 
+            // Player2Label
+            // 
+            this.Player2Label.AutoSize = true;
+            this.Player2Label.Location = new System.Drawing.Point(487, 60);
+            this.Player2Label.Name = "Player2Label";
+            this.Player2Label.Size = new System.Drawing.Size(51, 15);
+            this.Player2Label.TabIndex = 23;
+            this.Player2Label.Text = "Player2:";
+            // 
+            // Player2UsernameBox
+            // 
+            this.Player2UsernameBox.Enabled = false;
+            this.Player2UsernameBox.Location = new System.Drawing.Point(542, 60);
+            this.Player2UsernameBox.Name = "Player2UsernameBox";
+            this.Player2UsernameBox.Size = new System.Drawing.Size(153, 20);
+            this.Player2UsernameBox.TabIndex = 24;
+            // 
+            // Player2ScoreLable
+            // 
+            this.Player2ScoreLable.AutoSize = true;
+            this.Player2ScoreLable.Location = new System.Drawing.Point(487, 86);
+            this.Player2ScoreLable.Name = "Player2ScoreLable";
+            this.Player2ScoreLable.Size = new System.Drawing.Size(42, 15);
+            this.Player2ScoreLable.TabIndex = 25;
+            this.Player2ScoreLable.Text = "Score:";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Enabled = false;
+            this.textBox1.Location = new System.Drawing.Point(535, 86);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(162, 20);
+            this.textBox1.TabIndex = 26;
             // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(780, 538);
+            this.ClientSize = new System.Drawing.Size(707, 474);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.Player2ScoreLable);
+            this.Controls.Add(this.Player2UsernameBox);
+            this.Controls.Add(this.Player2Label);
+            this.Controls.Add(this.WordsListLable);
             this.Controls.Add(this.BoggleBoard);
             this.Controls.Add(this.WordList);
             this.Controls.Add(this.WordBoxLabel);
@@ -262,6 +319,11 @@
         private System.Windows.Forms.Label WordBoxLabel;
         private System.Windows.Forms.RichTextBox WordList;
         private SSGui.SpreadsheetPanel BoggleBoard;
+        private System.Windows.Forms.Label WordsListLable;
+        private System.Windows.Forms.Label Player2Label;
+        private System.Windows.Forms.TextBox Player2UsernameBox;
+        private System.Windows.Forms.Label Player2ScoreLable;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 
