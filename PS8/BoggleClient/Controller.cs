@@ -10,6 +10,7 @@ namespace BoggleClient
     {
         char[][] board;
         private IBoggleView window;
+        private string token;
 
         public Controller(IBoggleView window)
         {
@@ -19,7 +20,7 @@ namespace BoggleClient
 
         void EventSetup()
         {
-            window.RegisterEvent += HandleRegister();
+            window.RegisterEvent += HandleRegister;
             window.CancelRegisterEvent += HandleCancelRegister;
             window.RequestEvent += HandleRequest;
             window.CancelRequestEvent += HandleCancelRequest;
@@ -27,8 +28,9 @@ namespace BoggleClient
             window.StartGameEvent += HandelStartGame;
         }
 
-        private Action<string, string> HandleRegister()
+        private void HandleRegister(string domain, string name)
         {
+            
             throw new NotImplementedException();
         }
 

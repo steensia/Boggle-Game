@@ -43,7 +43,7 @@ namespace BoggleClient
             UsernameBox.Enabled = false;
             DomainBox.Enabled = false;
             RegisterButton.Enabled = false;
-            RegisterEvent?.Invoke(UsernameBox.Text, DomainBox.Text);
+            RegisterEvent?.Invoke(DomainBox.Text, UsernameBox.Text);
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
