@@ -3,18 +3,34 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleClient", "BoggleClient\BoggleClient.csproj", "{DD3852CF-D014-4E77-A4DA-95BE00A024EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleGui", "BoggleClient\BoggleGui.csproj", "{DD3852CF-D014-4E77-A4DA-95BE00A024EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetPanel", "..\Spreadsheet\SpreadsheetPanel\SpreadsheetPanel.csproj", "{F31299DC-288F-4E46-A3AF-6BF461B21C79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Debug|x86.Build.0 = Debug|Any CPU
 		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD3852CF-D014-4E77-A4DA-95BE00A024EB}.Release|x86.Build.0 = Release|Any CPU
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Debug|x86.ActiveCfg = Debug|x86
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Debug|x86.Build.0 = Debug|x86
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Release|x86.ActiveCfg = Release|x86
+		{F31299DC-288F-4E46-A3AF-6BF461B21C79}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

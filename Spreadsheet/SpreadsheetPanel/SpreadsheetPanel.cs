@@ -27,19 +27,19 @@ namespace SSGui
         // The SpreadsheetPanel is composed of a DrawingPanel (where the grid is drawn),
         // a horizontal scroll bar, and a vertical scroll bar.
         private DrawingPanel drawingPanel;
-        private HScrollBar hScroll;
-        private VScrollBar vScroll;
+        //private HScrollBar hScroll;
+        //private VScrollBar vScroll;
 
         // These constants control the layout of the spreadsheet grid.  The height and
         // width measurements are in pixels.
         private const int DATA_COL_WIDTH = 80;
-        private const int DATA_ROW_HEIGHT = 20;
-        private const int LABEL_COL_WIDTH = 30;
-        private const int LABEL_ROW_HEIGHT = 30;
+        private const int DATA_ROW_HEIGHT = 80;
+        private const int LABEL_COL_WIDTH = 0;
+        private const int LABEL_ROW_HEIGHT = 0;
         private const int PADDING = 2;
-        private const int SCROLLBAR_WIDTH = 20;
-        private const int COL_COUNT = 26;
-        private const int ROW_COUNT = 99;
+        private const int SCROLLBAR_WIDTH = 0;
+        private const int COL_COUNT = 4;
+        private const int ROW_COUNT = 4;
 
         /// <summary>
         /// Creates an empty SpreadsheetPanel
@@ -54,7 +54,7 @@ namespace SSGui
             drawingPanel = new DrawingPanel(this);
             drawingPanel.Location = new Point(0, 0);
             drawingPanel.AutoScroll = false;
-
+            /*
             // A custom vertical scroll bar.  It is designed to scroll in multiples of rows.
             vScroll = new VScrollBar();
             vScroll.SmallChange = 1;
@@ -63,16 +63,17 @@ namespace SSGui
             // A custom horizontal scroll bar.  It is designed to scroll in multiples of columns.
             hScroll = new HScrollBar();
             hScroll.SmallChange = 1;
-            hScroll.Maximum = COL_COUNT;
+            hScroll.Maximum = COL_COUNT
+            */
 
             // Add the drawing panel and the scroll bars to the SpreadsheetPanel.
             Controls.Add(drawingPanel);
-            Controls.Add(vScroll);
-            Controls.Add(hScroll);
+            //Controls.Add(vScroll);
+            //Controls.Add(hScroll);
 
             // Arrange for the drawing panel to be notified when it needs to scroll itself.
-            hScroll.Scroll += drawingPanel.HandleHScroll;
-            vScroll.Scroll += drawingPanel.HandleVScroll;
+            //hScroll.Scroll += drawingPanel.HandleHScroll;
+            //vScroll.Scroll += drawingPanel.HandleVScroll;
 
         }
 
@@ -142,14 +143,14 @@ namespace SSGui
             if (drawingPanel != null && (FindForm() == null || FindForm().WindowState != FormWindowState.Minimized))
             {
                 drawingPanel.Size = new Size(Width - SCROLLBAR_WIDTH, Height - SCROLLBAR_WIDTH);
-                vScroll.Location = new Point(Width - SCROLLBAR_WIDTH, 0);
-                vScroll.Size = new Size(SCROLLBAR_WIDTH, Height - SCROLLBAR_WIDTH);
+                //vScroll.Location = new Point(Width - SCROLLBAR_WIDTH, 0);
+                //vScroll.Size = new Size(SCROLLBAR_WIDTH, Height - SCROLLBAR_WIDTH);
                 int change = (Height - SCROLLBAR_WIDTH) / DATA_ROW_HEIGHT;
-                vScroll.LargeChange = (change < 0) ? 0 : change;
-                hScroll.Location = new Point(0, Height - SCROLLBAR_WIDTH);
-                hScroll.Size = new Size(Width - SCROLLBAR_WIDTH, SCROLLBAR_WIDTH);
+                //vScroll.LargeChange = (change < 0) ? 0 : change;
+                //hScroll.Location = new Point(0, Height - SCROLLBAR_WIDTH);
+                //hScroll.Size = new Size(Width - SCROLLBAR_WIDTH, SCROLLBAR_WIDTH);
                 change = (Width - SCROLLBAR_WIDTH) / DATA_COL_WIDTH;
-                hScroll.LargeChange = (change < 0) ? 0 : change;
+                //hScroll.LargeChange = (change < 0) ? 0 : change;
             }
         }
              
@@ -260,7 +261,6 @@ namespace SSGui
                 }
                 return true;
             }
-
             public bool SetSelection(int col, int row)
             {
                 if (InvalidAddress(col, row))
@@ -279,6 +279,7 @@ namespace SSGui
                 row = _selectedRow;
             }
 
+    
             public void HandleHScroll(Object sender, ScrollEventArgs args)
             {
                 _firstColumn = args.NewValue;
@@ -290,6 +291,7 @@ namespace SSGui
                 _firstRow = args.NewValue;
                 Invalidate();
             }
+            
 
             protected override void OnPaint(PaintEventArgs e)
             {
@@ -322,12 +324,14 @@ namespace SSGui
                         new Point(LABEL_COL_WIDTH + x * DATA_COL_WIDTH, bottom));
                 }
 
+                /*
                 // Draw the column labels
                 for (int x = 0; x < COL_COUNT - _firstColumn; x++)
                 {
                     Font f = (_selectedCol - _firstColumn == x) ? boldFont : Font;
                     DrawColumnLabel(e.Graphics, x, f);
                 }
+                */
 
                 // Draw the row lines
                 int right = LABEL_COL_WIDTH + (COL_COUNT - _firstColumn) * DATA_COL_WIDTH;
@@ -340,13 +344,16 @@ namespace SSGui
                         new Point(right, LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT));
                 }
 
+                /*
                 // Draw the row labels
                 for (int y = 0; y < (ROW_COUNT - _firstRow); y++)
                 {
                     Font f = (_selectedRow - _firstRow == y) ? boldFont : Font;
                     DrawRowLabel(e.Graphics, y, f);
                 }
+                */
 
+                /*
                 // Highlight the selection, if it is visible
                 if ((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0))
                 {
@@ -357,6 +364,7 @@ namespace SSGui
                                       DATA_COL_WIDTH - 2,
                                       DATA_ROW_HEIGHT - 2));
                 }
+                */
                 
                 // Draw the text
                 foreach (KeyValuePair<Address, String> address in _values)
@@ -389,7 +397,7 @@ namespace SSGui
             /// </summary>
             private void DrawColumnLabel(Graphics g, int x, Font f)
             {
-                String label = ((char)('A' + x + _firstColumn)).ToString();
+                String label = ((char)('A' + x + _firstColumn)).ToString(); label = "";
                 float height = g.MeasureString(label, f).Height;
                 float width = g.MeasureString(label, f).Width;
                 g.DrawString(
@@ -405,7 +413,7 @@ namespace SSGui
             /// </summary>
             private void DrawRowLabel(Graphics g, int y, Font f)
             {
-                String label = (y + 1 + _firstRow).ToString();
+                String label = (y + 1 + _firstRow).ToString();label = "";
                 float height = g.MeasureString(label, f).Height;
                 float width = g.MeasureString(label, f).Width;
                 g.DrawString(
@@ -422,6 +430,7 @@ namespace SSGui
             /// </summary>
             protected override void OnMouseClick(MouseEventArgs e)
             {
+               
                 base.OnClick(e);
                 int x = (e.X-LABEL_COL_WIDTH) / DATA_COL_WIDTH;
                 int y = (e.Y-LABEL_ROW_HEIGHT) / DATA_ROW_HEIGHT;
@@ -435,6 +444,7 @@ namespace SSGui
                     }
                 }
                 Invalidate();
+               
             }
         }
     }
