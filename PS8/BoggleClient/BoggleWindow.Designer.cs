@@ -50,7 +50,7 @@
             this.Player2Label = new System.Windows.Forms.Label();
             this.Player2UsernameBox = new System.Windows.Forms.TextBox();
             this.Player2ScoreLable = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.Player2ScoreBox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,6 +72,7 @@
             // 
             // CancelButton
             // 
+            this.CancelButton.Enabled = false;
             this.CancelButton.Location = new System.Drawing.Point(379, 57);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(102, 23);
@@ -96,6 +97,7 @@
             this.DomainBox.Name = "DomainBox";
             this.DomainBox.Size = new System.Drawing.Size(623, 20);
             this.DomainBox.TabIndex = 4;
+            this.DomainBox.Text = "http://ice.eng.utah.edu/BoggleService.svc/";
             // 
             // DomainLabel
             // 
@@ -108,12 +110,11 @@
             // 
             // TimerBox
             // 
+            this.TimerBox.Enabled = false;
             this.TimerBox.Location = new System.Drawing.Point(271, 86);
             this.TimerBox.Name = "TimerBox";
             this.TimerBox.Size = new System.Drawing.Size(63, 20);
             this.TimerBox.TabIndex = 6;
-            this.TimerBox.TextChanged += new System.EventHandler(this.TimerBox_TextChanged);
-            this.TimerBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.StartGame);
             // 
             // TimerLabel
             // 
@@ -126,6 +127,7 @@
             // 
             // RequestButton
             // 
+            this.RequestButton.Enabled = false;
             this.RequestButton.Location = new System.Drawing.Point(487, 112);
             this.RequestButton.Name = "RequestButton";
             this.RequestButton.Size = new System.Drawing.Size(102, 23);
@@ -136,6 +138,7 @@
             // 
             // CancelRequestButton
             // 
+            this.CancelRequestButton.Enabled = false;
             this.CancelRequestButton.Location = new System.Drawing.Point(595, 112);
             this.CancelRequestButton.Name = "CancelRequestButton";
             this.CancelRequestButton.Size = new System.Drawing.Size(102, 23);
@@ -183,6 +186,7 @@
             // 
             // WordBox
             // 
+            this.WordBox.Enabled = false;
             this.WordBox.Location = new System.Drawing.Point(97, 439);
             this.WordBox.Name = "WordBox";
             this.WordBox.Size = new System.Drawing.Size(237, 20);
@@ -225,7 +229,6 @@
             this.WordsListLable.Size = new System.Drawing.Size(42, 15);
             this.WordsListLable.TabIndex = 22;
             this.WordsListLable.Text = "Words";
-            this.WordsListLable.Click += new System.EventHandler(this.label4_Click);
             // 
             // Player2Label
             // 
@@ -253,20 +256,20 @@
             this.Player2ScoreLable.TabIndex = 25;
             this.Player2ScoreLable.Text = "Score:";
             // 
-            // textBox1
+            // Player2ScoreBox
             // 
-            this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(535, 86);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(162, 20);
-            this.textBox1.TabIndex = 26;
+            this.Player2ScoreBox.Enabled = false;
+            this.Player2ScoreBox.Location = new System.Drawing.Point(535, 86);
+            this.Player2ScoreBox.Name = "Player2ScoreBox";
+            this.Player2ScoreBox.Size = new System.Drawing.Size(162, 20);
+            this.Player2ScoreBox.TabIndex = 26;
             // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(707, 474);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.Player2ScoreBox);
             this.Controls.Add(this.Player2ScoreLable);
             this.Controls.Add(this.Player2UsernameBox);
             this.Controls.Add(this.Player2Label);
@@ -323,7 +326,7 @@
         private System.Windows.Forms.Label Player2Label;
         private System.Windows.Forms.TextBox Player2UsernameBox;
         private System.Windows.Forms.Label Player2ScoreLable;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox Player2ScoreBox;
     }
 }
 

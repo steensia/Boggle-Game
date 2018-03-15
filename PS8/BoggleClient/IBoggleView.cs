@@ -10,16 +10,26 @@ namespace BoggleClient
     {
         event Action<string,string> RegisterEvent;
         event Action CancelRegisterEvent;
-        event Action RequestEvent;
+        event Action<int> RequestEvent;
         event Action CancelRequestEvent;
         event Action<string> WordEnteredEvent;
-        event Action<int> StartGameEvent;
 
         String Wordlist { set; }
         int Timer { set; }
         int Score { set; }
+        bool RegisterEnabled { set; }
+        bool CancelEnabled { set; }
+        bool RequestEnabled { set; }
+        bool CancleRequestEnabled{ set; }
+        bool BoardEnabled { set; }
+        bool TimeEnabled { set; }
+        string Time { set; }
+        string Player2 { set; }
+        string Player2Score { set; }
 
         void GameOver();
         void LoadBoard(char[][] board);
+
+        
     }
 }
