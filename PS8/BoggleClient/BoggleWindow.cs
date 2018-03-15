@@ -13,8 +13,7 @@ namespace BoggleClient
     public partial class BoggleWindow : Form, IBoggleView
     {
         public string Wordlist { set => WordList.Text = value; }
-        public int Timer { set => TimerBox.Text = ""+value; }
-        public int Score { set => TimerBox.Text = "" + value; }
+        public string Score { set => ScoreBox.Text = value; }
         public bool RegisterEnabled { set => RegisterButton.Enabled = value; }
         public bool CancelEnabled { set => CancelButton.Enabled = value; }
         public bool RequestEnabled { set => RequestButton.Enabled = value; }
@@ -88,14 +87,13 @@ namespace BoggleClient
             TimerBox.Text = "";
         }
 
-        public void LoadBoard(char[][] board)
+        public void LoadBoard(string board)
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 16; i++)
             {
-                for (int j = 0; j < 4; j++)
-                {
-                    BoggleBoard.SetValue(i,j,""+board[i][j]);
-                }
+                int r = i / 4;
+                int c = i % 4;
+                BoggleBoard.SetValue(c,r,board.Substring(i,1));
             }         
         }
 

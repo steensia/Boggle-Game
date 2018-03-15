@@ -15,20 +15,19 @@ namespace BoggleClient
         event Action<string> WordEnteredEvent;
 
         String Wordlist { set; }
-        int Timer { set; }
-        int Score { set; }
         bool RegisterEnabled { set; }
         bool CancelEnabled { set; }
         bool RequestEnabled { set; }
         bool CancleRequestEnabled{ set; }
         bool BoardEnabled { set; }
         bool TimeEnabled { set; }
+        string Score { set; }
         string Time { set; }
         string Player2 { set; }
         string Player2Score { set; }
 
         void GameOver();
-        void LoadBoard(char[][] board);
+        void LoadBoard(string board);
 
         
     }

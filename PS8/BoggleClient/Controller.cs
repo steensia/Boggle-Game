@@ -13,17 +13,25 @@ namespace BoggleClient
 {
     class Controller
     {
-        char[][] board;
         private IBoggleView window;
         private string userToken;
         private string domain;
-        private int time;
         private string gameID;
+        private bool isPlayer1;
+        private string gameState;
+        System.Windows.Forms.Timer t;
 
         public Controller(IBoggleView window)
         {
             this.window = window;
+            t = new System.Windows.Forms.Timer();
+            t.Tick += delegate
+            {
+                fetchDataFromServer();
+            };
+            t.Interval = 1000;
             EventSetup();
+            
         }
 
         private CancellationTokenSource tokenSource;
@@ -106,32 +114,21 @@ namespace BoggleClient
 
                     if (response.IsSuccessStatusCode)
                     {
-                        window.CancleRequestEnabled = false;
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
                         gameID = (string)(temp.GameID);
-
                         
                         response = await client.GetAsync("games/"+gameID);
                         result = await response.Content.ReadAsStringAsync();
                         temp = JsonConvert.DeserializeObject(result);
-                        string gameState = (string)temp.GameState;
-                        bool isPlayer1 = false;
-                        string opponent = "";
 
-                        if (gameState.Equals("pending"))
-                        {
-                            System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
-                            t.Interval = 1000;
-                            
-                        }
+                        gameState = "pending";
+                        if (response.StatusCode.Equals(202))
+                            isPlayer1 = true;
                         else
-                        {
-                            window.Player2 = (string)temp.Player1;
-                        }
-                        
+                            isPlayer1 = false;
 
-                        window.BoardEnabled = true;                  
+                        t.Enabled = true;                
                     }
                     else
                     {
@@ -144,8 +141,6 @@ namespace BoggleClient
             }
             finally
             {
-                window.CancleRequestEnabled = false;
-                window.RequestEnabled = true;
             }
         }
 
@@ -156,10 +151,36 @@ namespace BoggleClient
 
         private async void HandleWordEntered(string word)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (HttpClient client = CreateClient(domain))
+                {
+                    dynamic user = new ExpandoObject();
+                    user.UserToken = userToken;
+                    user.Word = word;
+
+                    tokenSource = new CancellationTokenSource();
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PutAsync("games/"+gameID, content, tokenSource.Token);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        String result = await response.Content.ReadAsStringAsync();
+                        dynamic temp = JsonConvert.DeserializeObject(result);
+                        //window.Score = (string)temp.Score;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
 
-        private async Task StartGameAsync()
+        private async void fetchDataFromServer()
         {
             try
             {
@@ -168,17 +189,48 @@ namespace BoggleClient
                     HttpResponseMessage response = await client.GetAsync("games/" + gameID);
                     if (response.IsSuccessStatusCode)
                     {
-                       
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
 
-                        string player2 = (string)(temp.Player2);
-                        while (true)
+                        if ("pending".Equals((string)temp.GameState))
                         {
-
+                           
                         }
+                        else if("active".Equals((string)temp.GameState) && gameState.Equals("pending"))
+                        {
+                            window.BoardEnabled = true;
+                            window.CancleRequestEnabled = false;
+                            window.Time = (string)temp.TimeLeft;
+                            window.LoadBoard((string)temp.Board);
 
-                        window.BoardEnabled = true;
+                            if (isPlayer1)
+                            {
+                                window.Score = (string)temp.Player1.Score;
+                                window.Player2 = (string)temp.Player2.Nickname;
+                                window.Player2Score = (string)temp.Player2.Score;
+                            }
+                            else
+                            {
+                                window.Score = (string)temp.Player2.Score;
+                                window.Player2 = (string)temp.Player1.Nickname;
+                                window.Player2Score = (string)temp.Player1.Score;
+                            }
+                            gameState = "active";
+                        }
+                        else if("active".Equals((string)temp.GameState) && gameState.Equals("active"))
+                        {
+                            window.Time = temp.TimeLeft;
+                            if (isPlayer1)
+                            {
+                                window.Score = (string)temp.Player1.Score;
+                                window.Player2Score = (string)temp.Player2.Score;
+                            }
+                            else
+                            {
+                                window.Score = (string)temp.Player2.Score;
+                                window.Player2Score = (string)temp.Player1.Score;
+                            }
+                        }
                     }
                     else
                     {
@@ -188,7 +240,6 @@ namespace BoggleClient
             }
             catch
             {
-
             }
         }
 
@@ -199,7 +250,6 @@ namespace BoggleClient
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            //client.DefaultRequestHeaders.Add("Content-Type", "application/json");
 
             return client;
         }
