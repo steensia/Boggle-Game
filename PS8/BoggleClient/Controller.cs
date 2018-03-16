@@ -22,11 +22,14 @@ namespace BoggleClient
         private IBoggleView window;
 
         /// <summary>
-        /// A user token is valid if it is non-null and identifies a user.
-        /// A user consists of a nickname and a unique user token. A nickname can be any string, 
-        /// such as "Joe" or "Spike". A nickname does not need to be unique.
+        /// The timer for the game
         /// </summary>
-        private string userToken;
+        private System.Windows.Forms.Timer timer;
+
+        /// <summary>
+        /// For canceling the current operation
+        /// </summary>
+        private CancellationTokenSource tokenSource;
 
         /// <summary>
         /// The user provides the domain name of a Boggle Server
@@ -40,14 +43,16 @@ namespace BoggleClient
         private string gameID;
 
         /// <summary>
-        /// Identifies if event deals the first palyer
-        /// </summary>
-        private bool isPlayer1;
-
-        /// <summary>
         /// Displays the state of the game (active, pending, completed)
         /// </summary>
         private string gameState;
+
+        /// <summary>
+        /// A user token is valid if it is non-null and identifies a user.
+        /// A user consists of a nickname and a unique user token. A nickname can be any string, 
+        /// such as "Joe" or "Spike". A nickname does not need to be unique.
+        /// </summary>
+        private string userToken;
 
         /// <summary>
         /// Words entered by users and displayed on the word list
@@ -55,14 +60,10 @@ namespace BoggleClient
         private string words;
 
         /// <summary>
-        /// The timer for the game
+        /// Identifies if event deals the first palyer
         /// </summary>
-        System.Windows.Forms.Timer t;
+        private bool isPlayer1;
 
-        /// <summary>
-        /// For canceling the current operation
-        /// </summary>
-        private CancellationTokenSource tokenSource;
 
         /// <summary>
         /// Creates controller for the provided window
@@ -72,13 +73,19 @@ namespace BoggleClient
         public Controller(IBoggleView window)
         {
             this.window = window;
-            t = new System.Windows.Forms.Timer();
-            t.Tick += delegate
+
+            this.words = "";
+            this.gameState = "completed";
+            this.gameID = "";
+            this.isPlayer1 = true;
+
+            timer = new System.Windows.Forms.Timer();
+            timer.Tick += delegate
             {
-                fetchDataFromServer();
+                FetchDataFromServer();
             };
-            t.Interval = 1000;
-            EventSetup();          
+            timer.Interval = 1000;
+            EventSetup();
         }
 
         /// <summary>
@@ -102,13 +109,14 @@ namespace BoggleClient
         {
             try
             {
-                window.RegisterEnabled = false;
 
                 //needs a method to diable proper controles
                 using (HttpClient client = CreateClient(domain))
                 {
                     dynamic user = new ExpandoObject();
                     user.Nickname = name;
+
+                    window.RegisterEnabled = false;
 
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
@@ -159,14 +167,14 @@ namespace BoggleClient
         {
             try
             {
-                window.RequestEnabled = false;
                 using (HttpClient client = CreateClient(domain))
                 {
                     dynamic user = new ExpandoObject();
                     user.UserToken = userToken;
                     user.TimeLimit = time;
 
-                    window.CancleRequestEnabled = true;
+                    window.RequestEnabled = false;
+                    window.CancelRequestEnabled = true;
 
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
@@ -177,8 +185,8 @@ namespace BoggleClient
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
                         gameID = (string)(temp.GameID);
-                        
-                        response = await client.GetAsync("games/"+gameID);
+
+                        response = await client.GetAsync("games/" + gameID);
                         result = await response.Content.ReadAsStringAsync();
                         temp = JsonConvert.DeserializeObject(result);
 
@@ -189,10 +197,14 @@ namespace BoggleClient
                         else
                             isPlayer1 = true;
 
-                        t.Enabled = true;                
+                        window.RegisterEnabled = false;
+                        window.TimeEnabled = false;
+                        timer.Enabled = true;
                     }
                     else
                     {
+                        window.RequestEnabled = true;
+                        window.CancelRequestEnabled = false;
                         MessageBox.Show("Error joining game: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
@@ -217,18 +229,21 @@ namespace BoggleClient
                     dynamic user = new ExpandoObject();
                     user.UserToken = userToken;
 
+                    timer.Enabled = false;
+
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await client.PutAsync("games" , content);
+                    HttpResponseMessage response = await client.PutAsync("games", content);
+
+                    Reset();
 
                     if (response.IsSuccessStatusCode)
                     {
-                        window.RequestEnabled = true;
-                        window.CancleRequestEnabled = false;
+
                     }
                     else
                     {
-                        MessageBox.Show("Error finding another player: " + response.StatusCode + "\n" + response.ReasonPhrase);
+
                     }
                 }
             }
@@ -254,7 +269,7 @@ namespace BoggleClient
 
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await client.PutAsync("games/"+gameID, content, tokenSource.Token);
+                    HttpResponseMessage response = await client.PutAsync("games/" + gameID, content, tokenSource.Token);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -262,7 +277,7 @@ namespace BoggleClient
                         dynamic temp = JsonConvert.DeserializeObject(result);
                         int score = int.Parse((string)temp.Score);
                         {
-                            words+=word+" ("+score+")\n";
+                            words += word + " (" + score + ")\n";
                             window.Wordlist = words;
                         }
                     }
@@ -281,7 +296,7 @@ namespace BoggleClient
         /// Communicates with the server and displays the appropriate time, game status,
         /// player names and scores.
         /// </summary>
-        private async void fetchDataFromServer()
+        private async void FetchDataFromServer()
         {
             try
             {
@@ -292,55 +307,79 @@ namespace BoggleClient
                     {
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
+                        dynamic op, player;
+
+                        if (isPlayer1)
+                        {
+                            player = temp.Player1;
+                            op = temp.Player2;
+                        }
+                        else
+                        {
+                            player = temp.Player2;
+                            op = temp.Player1;
+                        }
 
                         if ("pending".Equals((string)temp.GameState))
                         {
-                           
+
                         }
-                        else if("active".Equals((string)temp.GameState) && gameState.Equals("pending"))
+                        else if ("active".Equals((string)temp.GameState) && gameState.Equals("pending"))
                         {
                             window.BoardEnabled = true;
-                            window.CancleRequestEnabled = false;
+
 
                             window.Time = (string)temp.TimeLeft;
                             window.LoadBoard((string)temp.Board);
 
-                            if (isPlayer1)
-                            {
-                                window.Score = (string)temp.Player1.Score;
-                                window.Player2 = (string)temp.Player2.Nickname;
-                                window.Player2Score = (string)temp.Player2.Score;
-                            }
-                            else
-                            {
-                                window.Score = (string)temp.Player2.Score;
-                                window.Player2 = (string)temp.Player1.Nickname;
-                                window.Player2Score = (string)temp.Player1.Score;
-                            }
+                            window.Score = (string)player.Score;
+                            window.Player2 = (string)op.Nickname;
+                            window.Player2Score = (string)op.Score;
+
                             gameState = "active";
                         }
-                        else if("active".Equals((string)temp.GameState) && gameState.Equals("active"))
+                        else if ("active".Equals((string)temp.GameState) && gameState.Equals("active"))
                         {
                             window.Time = temp.TimeLeft;
-                            if (isPlayer1)
-                            {
-                                window.Score = (string)temp.Player1.Score;
-                                window.Player2Score = (string)temp.Player2.Score;
-                            }
-                            else
-                            {
-                                window.Score = (string)temp.Player2.Score;
-                                window.Player2Score = (string)temp.Player1.Score;
-                            }
+
+                            window.Score = (string)player.Score;
+                            window.Player2Score = (string)op.Score;
+
                         }
-                        else if ("complete".Equals((string)temp.GameState) && gameState.Equals("active"))
+                        else if ("completed".Equals((string)temp.GameState) && gameState.Equals("active"))
                         {
-                            gameState = "complete";
+                            gameState = "completed";
+                            List<dynamic> myWords = new List<dynamic>(), opWords = new List<dynamic>();
+
+                            myWords = new List<dynamic>(player.WordsPlayed);
+                            opWords = new List<dynamic>(op.WordsPlayed);
+
+                            string message = "GAMEOVER\n";
+
+                            message += "\nPlayer1-" + (string)player.Nickname + ": " + (string)player.Score + "\n";
+
+                            foreach (dynamic s in myWords)
+                                message += (string)s.Word + " (" + (int)s.Score + ")\n";
+
+                            message += "\nPlayer2-" + (string)op.Nickname + ": " + (string)op.Score + "\n";
+
+                            foreach (dynamic s in opWords)
+                                message += (string)s.Word + " (" + (int)s.Score + ")\n";
+
+                            MessageBox.Show(message);
+
+                            timer.Enabled = false;
+                            window.BoardEnabled = false;
+
+                        }
+                        else if ("completed".Equals((string)temp.GameState) && gameState.Equals("completed"))
+                        {
 
                         }
                         else
                         {
-                            
+                            timer.Enabled = false;
+                            MessageBox.Show("Something went wrong");
                         }
                     }
                     else
@@ -352,6 +391,25 @@ namespace BoggleClient
             catch
             {
             }
+        }
+
+        private void Reset()
+        {
+            window.RequestEnabled = true;
+            window.CancelRequestEnabled = false;
+            window.TimeEnabled = true;
+            window.Time = "";
+            window.RegisterEnabled = true;
+            window.Score = "";
+            window.Player2 = "";
+            window.Player2Score = "";
+            window.BoardEnabled = false;
+            window.Wordlist = "";
+            window.LoadBoard("");
+            this.words = "";
+            this.gameState = "completed";
+            this.gameID = "";
+            this.isPlayer1 = true;
         }
 
         /// <summary>

@@ -61,7 +61,7 @@ namespace BoggleClient
         /// <summary>
         /// Identify when the CancelRequest button is active or not
         /// </summary>
-        bool CancleRequestEnabled{ set; }
+        bool CancelRequestEnabled{ set; }
 
         /// <summary>
         /// Identify when the BoggleBoard is active or not
@@ -92,11 +92,6 @@ namespace BoggleClient
         /// Display the second player's score
         /// </summary>
         string Player2Score { set; }
-
-        /// <summary>
-        /// Notifies the user that the game is over
-        /// </summary>
-        void GameOver();
 
         /// <summary>
         /// Populates the boggle board with random letters

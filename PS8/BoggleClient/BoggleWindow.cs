@@ -73,7 +73,7 @@ namespace BoggleClient
                 MessageBox.Show("The time needs to be an integer");
             }
         }
-        
+
         /// <summary>
         /// Handles Cancel Request button event in the grid
         /// </summary>
@@ -81,7 +81,7 @@ namespace BoggleClient
         /// <param name="e"></param>
         private void CancelRequestButton_Click(object sender, EventArgs e)
         {
-                CancelRequestEvent?.Invoke();
+            CancelRequestEvent?.Invoke();
         }
 
         /// <summary>
@@ -98,13 +98,11 @@ namespace BoggleClient
             }
         }
 
-        /// <summary>
-        /// Notifies the user that the game is over
-        /// </summary>
-        public void GameOver()
+        private void RegistrationEnabled(bool b)
         {
-            TimerBox.Enabled = true;
-            TimerBox.Text = "";
+            RegisterButton.Enabled = b;
+            DomainBox.Enabled = b;
+            UsernameBox.Enabled = b;
         }
 
         /// <summary>
@@ -116,7 +114,10 @@ namespace BoggleClient
             {
                 int r = i / 4;
                 int c = i % 4;
-                BoggleBoard.SetValue(c,r,"  "+board.Substring(i,1));
+                if (i >= board.Length)
+                    BoggleBoard.SetValue(c, r, "");
+                else
+                    BoggleBoard.SetValue(c, r, "  " + board.Substring(i, 1));
             }         
         }
 
@@ -155,7 +156,7 @@ namespace BoggleClient
         /// <summary>
         /// Identify when the Register button is active or not
         /// </summary>
-        public bool RegisterEnabled { set => RegisterButton.Enabled = value; }
+        public bool RegisterEnabled { set => RegistrationEnabled(value); }
 
         /// <summary>
         /// Identify when the Cancel button is active or not
@@ -170,7 +171,7 @@ namespace BoggleClient
         /// <summary>
         /// Identify when the CancelRequest button is active or not
         /// </summary>
-        public bool CancleRequestEnabled { set => CancelRequestButton.Enabled = value; }
+        public bool CancelRequestEnabled { set => Cancel.Enabled = value; }
 
         /// <summary>
         /// Identify when the BoggleBoard is active or not

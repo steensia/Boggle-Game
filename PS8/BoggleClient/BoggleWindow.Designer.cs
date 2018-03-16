@@ -37,7 +37,7 @@
             this.TimerBox = new System.Windows.Forms.TextBox();
             this.TimerLabel = new System.Windows.Forms.Label();
             this.RequestButton = new System.Windows.Forms.Button();
-            this.CancelRequestButton = new System.Windows.Forms.Button();
+            this.Cancel = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.Help = new System.Windows.Forms.ToolStripMenuItem();
             this.ScoreLabel = new System.Windows.Forms.Label();
@@ -136,16 +136,16 @@
             this.RequestButton.UseVisualStyleBackColor = true;
             this.RequestButton.Click += new System.EventHandler(this.RequestButton_Click);
             // 
-            // CancelRequestButton
+            // Cancel
             // 
-            this.CancelRequestButton.Enabled = false;
-            this.CancelRequestButton.Location = new System.Drawing.Point(595, 112);
-            this.CancelRequestButton.Name = "CancelRequestButton";
-            this.CancelRequestButton.Size = new System.Drawing.Size(102, 23);
-            this.CancelRequestButton.TabIndex = 9;
-            this.CancelRequestButton.Text = "Cancel Request";
-            this.CancelRequestButton.UseVisualStyleBackColor = true;
-            this.CancelRequestButton.Click += new System.EventHandler(this.CancelRequestButton_Click);
+            this.Cancel.Enabled = false;
+            this.Cancel.Location = new System.Drawing.Point(595, 112);
+            this.Cancel.Name = "Cancel";
+            this.Cancel.Size = new System.Drawing.Size(102, 23);
+            this.Cancel.TabIndex = 9;
+            this.Cancel.Text = "Cancel Request";
+            this.Cancel.UseVisualStyleBackColor = true;
+            this.Cancel.Click += new System.EventHandler(this.CancelRequestButton_Click);
             // 
             // menuStrip1
             // 
@@ -207,7 +207,7 @@
             // WordList
             // 
             this.WordList.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.WordList.Font = new System.Drawing.Font("dragon_alphabet", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.WordList.Font = new System.Drawing.Font("Comic Sans MS", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.WordList.Location = new System.Drawing.Point(343, 111);
             this.WordList.Name = "WordList";
             this.WordList.ReadOnly = true;
@@ -220,6 +220,7 @@
             this.BoggleBoard.Enabled = false;
             this.BoggleBoard.Font = new System.Drawing.Font("Comic Sans MS", 19.69811F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BoggleBoard.Location = new System.Drawing.Point(12, 111);
+            this.BoggleBoard.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
             this.BoggleBoard.Name = "BoggleBoard";
             this.BoggleBoard.Size = new System.Drawing.Size(322, 322);
             this.BoggleBoard.TabIndex = 18;
@@ -227,9 +228,10 @@
             // WordsListLable
             // 
             this.WordsListLable.AutoSize = true;
-            this.WordsListLable.Location = new System.Drawing.Point(387, 93);
+            this.WordsListLable.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.WordsListLable.Location = new System.Drawing.Point(386, 88);
             this.WordsListLable.Name = "WordsListLable";
-            this.WordsListLable.Size = new System.Drawing.Size(42, 15);
+            this.WordsListLable.Size = new System.Drawing.Size(55, 20);
             this.WordsListLable.TabIndex = 22;
             this.WordsListLable.Text = "Words";
             // 
@@ -284,7 +286,7 @@
             this.Controls.Add(this.ScoreBox);
             this.Controls.Add(this.ScoreLabel);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.CancelRequestButton);
+            this.Controls.Add(this.Cancel);
             this.Controls.Add(this.RequestButton);
             this.Controls.Add(this.TimerLabel);
             this.Controls.Add(this.TimerBox);
@@ -315,7 +317,7 @@
         private System.Windows.Forms.TextBox TimerBox;
         private System.Windows.Forms.Label TimerLabel;
         private System.Windows.Forms.Button RequestButton;
-        private System.Windows.Forms.Button CancelRequestButton;
+        private System.Windows.Forms.Button Cancel;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem Help;
         private System.Windows.Forms.Label ScoreLabel;
