@@ -50,6 +50,11 @@ namespace BoggleClient
         private string gameState;
 
         /// <summary>
+        /// Words entered by users and displayed on the word list
+        /// </summary>
+        private string words;
+
+        /// <summary>
         /// The timer for the game
         /// </summary>
         System.Windows.Forms.Timer t;
@@ -200,6 +205,9 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Cancels the request for a user and re-enables the buttons
+        /// </summary>
         private async void HandleCancelRequestAsync()
         {
             try
