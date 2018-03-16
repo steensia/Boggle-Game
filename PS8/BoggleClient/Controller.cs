@@ -193,7 +193,7 @@ namespace BoggleClient
                     }
                     else
                     {
-                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                        MessageBox.Show("Error joining game: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
             }
@@ -228,7 +228,7 @@ namespace BoggleClient
                     }
                     else
                     {
-                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                        MessageBox.Show("Error finding another player: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
             }
@@ -268,7 +268,7 @@ namespace BoggleClient
                     }
                     else
                     {
-                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                        MessageBox.Show("Error incorrect word: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
             }
@@ -345,7 +345,7 @@ namespace BoggleClient
                     }
                     else
                     {
-                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                        MessageBox.Show("Error game status: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
             }
