@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// View for BoggleClient
+    /// </summary>
     public partial class BoggleWindow : Form, IBoggleView
     {
         public string Wordlist { set => WordList.Text = value; }

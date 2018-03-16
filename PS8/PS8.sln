@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleGui", "BoggleClient\BoggleGui.csproj", "{DD3852CF-D014-4E77-A4DA-95BE00A024EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoggleClient", "BoggleClient\BoggleClient.csproj", "{DD3852CF-D014-4E77-A4DA-95BE00A024EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetPanel", "..\Spreadsheet\SpreadsheetPanel\SpreadsheetPanel.csproj", "{F31299DC-288F-4E46-A3AF-6BF461B21C79}"
 EndProject

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// The controller for the BoggleClient
+    /// </summary>
     class Controller
     {
         char[][] board;
