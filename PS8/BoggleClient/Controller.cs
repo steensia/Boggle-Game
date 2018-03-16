@@ -11,16 +11,59 @@ using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// The controller for the BoggleClient
+    /// </summary>
     class Controller
     {
+        /// <summary>
+        /// The window controlled by this Controller
+        /// </summary>
         private IBoggleView window;
+
+        /// <summary>
+        /// A user token is valid if it is non-null and identifies a user.
+        /// A user consists of a nickname and a unique user token. A nickname can be any string, 
+        /// such as "Joe" or "Spike". A nickname does not need to be unique.
+        /// </summary>
         private string userToken;
+
+        /// <summary>
+        /// The user provides the domain name of a Boggle Server
+        /// </summary>
         private string domain;
+
+        /// <summary>
+        /// A user is provided with a game ID after registering.
+        /// A pending game contains a gameID.
+        /// </summary>
         private string gameID;
+
+        /// <summary>
+        /// Identifies if event deals the first palyer
+        /// </summary>
         private bool isPlayer1;
+
+        /// <summary>
+        /// Displays the state of the game (active, pending, completed)
+        /// </summary>
         private string gameState;
+
+        /// <summary>
+        /// The timer for the game
+        /// </summary>
         System.Windows.Forms.Timer t;
 
+        /// <summary>
+        /// For canceling the current operation
+        /// </summary>
+        private CancellationTokenSource tokenSource;
+
+        /// <summary>
+        /// Creates controller for the provided window
+        /// Commences a new Boggle game and sets up the event handlers
+        /// </summary>
+        /// <param name="window"></param>
         public Controller(IBoggleView window)
         {
             this.window = window;
@@ -30,13 +73,13 @@ namespace BoggleClient
                 fetchDataFromServer();
             };
             t.Interval = 1000;
-            EventSetup();
-            
+            EventSetup();        
         }
 
-        private CancellationTokenSource tokenSource;
-
-        void EventSetup()
+        /// <summary>
+        /// Handles all the events to be fired
+        /// </summary>
+        private void EventSetup()
         {
             window.RegisterEvent += HandleRegisterAsync;
             window.CancelRegisterEvent += HandleCancelRegister;
@@ -45,6 +88,11 @@ namespace BoggleClient
             window.WordEnteredEvent += HandleWordEntered;
         }
 
+        /// <summary>
+        /// Registers a user to play Boggle with the given Boggle domain and username
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="name"></param>
         private async void HandleRegisterAsync(string domain, string name)
         {
             try
@@ -89,11 +137,19 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Cancels the current register operation
+        /// </summary>
         private void HandleCancelRegister()
         {
             tokenSource.Cancel();
         }
 
+        /// <summary>
+        /// Register the time the user wishes to play the game for
+        /// Request a game with another player and start a game with them.
+        /// </summary>
+        /// <param name="time"></param>
         private async void HandleRequestAsync(int time)
         {
             try
@@ -143,12 +199,18 @@ namespace BoggleClient
             {
             }
         }
-
+        /// <summary>
+        /// Cancels the current request operation
+        /// </summary>
         private void HandleCancelRequest()
         {
             tokenSource.Cancel();
         }
 
+        /// <summary>
+        /// Displays the words entered by the users in the Boggle game
+        /// </summary>
+        /// <param name="word"></param>
         private async void HandleWordEntered(string word)
         {
             try
@@ -180,6 +242,10 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Communicates with the server and displays the appropriate time, game status,
+        /// player names and scores.
+        /// </summary>
         private async void fetchDataFromServer()
         {
             try
@@ -243,6 +309,9 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Creates an HttpClient for communicating with the server.
+        /// </summary>
         private static HttpClient CreateClient(string domain)
         {
             HttpClient client = new HttpClient();
