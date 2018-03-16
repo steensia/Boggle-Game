@@ -187,35 +187,38 @@
             // WordBox
             // 
             this.WordBox.Enabled = false;
-            this.WordBox.Location = new System.Drawing.Point(97, 439);
+            this.WordBox.Font = new System.Drawing.Font("Comic Sans MS", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.WordBox.Location = new System.Drawing.Point(121, 439);
             this.WordBox.Name = "WordBox";
-            this.WordBox.Size = new System.Drawing.Size(237, 20);
+            this.WordBox.Size = new System.Drawing.Size(213, 28);
             this.WordBox.TabIndex = 15;
-            this.WordBox.TextChanged += new System.EventHandler(this.WordBox_TextChanged);
             this.WordBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.WordBox_KeyDown);
             // 
             // WordBoxLabel
             // 
             this.WordBoxLabel.AutoSize = true;
-            this.WordBoxLabel.Location = new System.Drawing.Point(12, 442);
+            this.WordBoxLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.WordBoxLabel.Location = new System.Drawing.Point(12, 443);
             this.WordBoxLabel.Name = "WordBoxLabel";
-            this.WordBoxLabel.Size = new System.Drawing.Size(79, 15);
+            this.WordBoxLabel.Size = new System.Drawing.Size(103, 20);
             this.WordBoxLabel.TabIndex = 16;
             this.WordBoxLabel.Text = "Enter a word:";
             // 
             // WordList
             // 
             this.WordList.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.WordList.Font = new System.Drawing.Font("dragon_alphabet", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.WordList.Location = new System.Drawing.Point(343, 111);
             this.WordList.Name = "WordList";
             this.WordList.ReadOnly = true;
-            this.WordList.Size = new System.Drawing.Size(138, 348);
+            this.WordList.Size = new System.Drawing.Size(138, 356);
             this.WordList.TabIndex = 17;
             this.WordList.Text = "";
             // 
             // BoggleBoard
             // 
             this.BoggleBoard.Enabled = false;
+            this.BoggleBoard.Font = new System.Drawing.Font("Comic Sans MS", 19.69811F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BoggleBoard.Location = new System.Drawing.Point(12, 111);
             this.BoggleBoard.Name = "BoggleBoard";
             this.BoggleBoard.Size = new System.Drawing.Size(322, 322);
@@ -268,7 +271,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(707, 474);
+            this.ClientSize = new System.Drawing.Size(707, 477);
             this.Controls.Add(this.Player2ScoreBox);
             this.Controls.Add(this.Player2ScoreLable);
             this.Controls.Add(this.Player2UsernameBox);
