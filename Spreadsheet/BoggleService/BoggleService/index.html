@@ -1,0 +1,470 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Boggle API</title>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            font-size: 14px;
+            color: black;
+            font-family: sans-serif;
+            width: 700px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        li {
+            margin: 0 0 8px 0;
+        }
+
+        hr {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        th, td {
+            padding: 4px;
+            text-align: left;
+        }
+
+        pre {
+            font-family: sans-serif;
+            border: 1px solid gray;
+            border-radius: 5px;
+            background-color: #EEEEEE;
+        }
+
+            pre span {
+                font-size: 14px;
+                padding: 0px;
+            }
+    </style>
+</head>
+<body>
+
+    <h1>Boggle API</h1>
+
+    <p>
+        The exact response to undefined or malformed HTTP requests is server-dependent and is not specified in this API,
+        except to note that some sort of error status code will be included in the response.
+    </p>
+
+    <p>
+        The response status code 500 (InternalServerError) is used to report, among other things, unhandled exceptions in the
+        service.  Sometimes, trying the same service call again will succeed, depending on the nature of the error.
+    </p>
+
+    <p>
+        The URLs given below are relative to
+        <a href="http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/">http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/</a>.
+    </p>
+
+    <p>
+        The Boggle server keeps track of a set of users, a set of active and completed games, and exactly one pending game.
+    </p>
+
+    <p>
+        The API makes heavy use of user tokens for authentication.  User tokens are strings that are unique and extremely
+        difficult to guess.  This implies that they must be long and randomly generated.  (A good way to generate such a token
+        in C# is with Guid.NewGuid().)
+    </p>
+
+    <p>
+        The API also makes heavy use of game IDs to identify games.  Game IDs are strings that are unique, short, and embeddable
+        in the path portion of URLs.  Small, consecutively generated integers are good for this purpose.
+    </p>
+
+    <p>
+        A user token is valid if it is non-null and identifies a user.  A game token is valid if it is
+        non-null and identifies a game.
+    </p>
+
+    <p>
+        A user consists of a nickname and a unique user token.  A nickname can be any string, such as "Joe" or "Spike".  A
+        nickname does not need to be unique.
+    </p>
+
+    <p>
+        The pending game has a GameID.  If one player belongs to the pending game, it also has a UserID and a requested time limit.
+        Think of it as a game that is waiting for a second player to join.  There is always exactly one pending game.
+    </p>
+
+    <p>
+        An active or completed game consists of:
+        <ul>
+            <li>A unique game token.</li>
+            <li>
+                A game state that is either "active" (game currently being played) or "completed" (game for which time
+                has expired).  Any number of games can be active and/or completed.
+            </li>
+            <li>
+                The user tokens of the first and second players to join the game.
+            </li>
+            <li>
+                The 16-character string that represents the contents of the game board.
+            </li>
+            <li>
+                The time limit of the game, in seconds.
+            </li>
+            <li>
+                The time remaining in the game, in seconds.
+            </li>
+            <li>
+                The current scores of the two players.
+            </li>
+            <li>
+                Lists of word/score pairs for the two players.  A word/score pair consists of a word that was played and the
+                score received for that word.  The words should appear in the order in which they were played.
+            </li>
+        </ul>
+    </p>
+
+    <p>&nbsp;</p>
+
+    <h2>Create User</h2>
+
+    <p>
+        Create a new user.
+
+        <ul>
+            <li>
+                If Nickname is null, or is empty when trimmed, responds with status 403 (Forbidden).
+            </li>
+            <li>
+                Otherwise, creates a new user with a unique UserToken and the trimmed Nickname.  The returned UserToken
+                should be used to identify the user in subsequent requests.  Responds with status
+                201 (Created).
+            </li>
+        </ul>
+    </p>
+
+    <pre><span>
+    POST users
+    </span></pre>
+
+    <h4>Input</h4>
+
+    <table border="1">
+
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+
+        <tr><td>Nickname</td><td>string</td><td>Nickname of the user</td></tr>
+
+    </table>
+
+    <h4>Example</h4>
+
+    <pre><span>
+    POST users
+    {
+        "Nickname": "Joe"
+    }
+    </span></pre>
+
+    <h4>Response</h4>
+
+    <pre><span>
+    Status: 201 Created
+    {
+        "UserToken": "9eb536af-50a1-476f-856e-ffff8f1b25d2"
+    }
+    </span></pre>
+
+    <p>&nbsp;</p>
+
+    <h2>Join Game</h2>
+
+    <p>
+        Join a game.
+        <ul>
+            <li>
+                If UserToken is invalid, TimeLimit < 5, or TimeLimit > 120,
+                responds with status 403 (Forbidden).
+            </li>
+            <li>
+                Otherwise, if UserToken is already a player in the pending game,
+                responds with status 409 (Conflict).
+            </li>
+            <li>
+                Otherwise, if there is already one player in the pending game, adds UserToken as
+                the second player.  The pending game becomes active and a new pending game with no players
+                is created.   The active game's time limit is the integer average of the time limits
+                requested by the two players.  Returns the new active game's GameID (which should be the
+                same as the old pending game's GameID).  Responds with status 201 (Created).
+            </li>
+            <li>
+                Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as
+                the pending game's requested time limit.  Returns the pending game's GameID.
+                Responds with status 202 (Accepted).
+            </li>
+        </ul>
+    </p>
+
+    <pre><span>
+    POST games
+    </span></pre>
+
+    <h4>Input</h4>
+
+    <table border="1">
+
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+
+        <tr><td>UserToken</td><td>string</td><td>Token of user joining game</td></tr>
+        <tr><td>TimeLimit</td><td>int</td><td>Requested time limit</td></tr>
+
+    </table>
+
+    <h4>Example</h4>
+
+    <pre><span>
+    POST games
+    {
+        "UserToken": "9eb536af-50a1-476f-856e-ffff8f1b25d2",
+        "TimeLimit": 25
+    }
+    </span></pre>
+
+    <h4>Response (if UserToken is the first player)</h4>
+
+    <pre><span>
+    Status: 202 Accepted
+    {
+        "GameID": "128"
+    }
+    </span></pre>
+
+    <h4>Response (if UserToken is the second player)</h4>
+
+    <pre><span>
+    Status: 201 Created
+    {
+        "GameID": "128"
+    }
+    </span></pre>
+
+
+    <p>&nbsp;</p>
+
+    <h2>Cancel Join Request</h2>
+
+    <p>
+        Cancel a pending request to join a game.
+        <ul>
+            <li>
+                If UserToken is invalid or is not a player in the pending game, responds with
+                status 403 (Forbidden).
+            </li>
+            <li>
+                Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
+            </li>
+        </ul>
+    </p>
+
+    <pre><span>
+    PUT games
+    </span></pre>
+
+    <h4>Input</h4>
+
+    <table border="1">
+
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+
+        <tr><td>UserToken</td><td>string</td><td>Token of user canceling join request</td></tr>
+
+    </table>
+
+    <h4>Example</h4>
+
+    <pre><span>
+    PUT games
+    {
+        "UserToken": "9eb536af-50a1-476f-856e-ffff8f1b25d2"
+    }
+    </span></pre>
+
+    <h4>Response</h4>
+
+    <pre><span>
+    Status: 200 OK
+    </span></pre>
+
+
+    <p>&nbsp;</p>
+
+    <h2>Play Word</h2>
+
+    <p>
+        Play a word in a game.
+        <ul>
+            <li>
+                If Word is null or empty when trimmed, or if GameID or UserToken is missing or invalid, or if UserToken is not a player in
+                the game identified by GameID, responds with response code 403 (Forbidden).
+            </li>
+            <li>
+                Otherwise, if the game state is anything other than "active", responds with response code 409 (Conflict).
+            </li>
+            <li>
+                Otherwise, records the trimmed Word as being played by UserToken in the game identified by GameID.  Returns
+                the score for Word in the context of the game (e.g. if Word has been played before the score is zero).
+                Responds with status 200 (OK).  Note: The word is not case sensitive.
+            </li>
+        </ul>
+    </p>
+
+    <pre><span>
+    PUT games/{GameID}
+    </span></pre>
+
+    <h4>Input</h4>
+
+    <table border="1">
+
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+
+        <tr><td>UserToken</td><td>string</td><td>Token of user playing word</td></tr>
+
+        <tr><td>Word</td><td>string</td><td>Word being played</td></tr>
+
+    </table>
+
+    <h4>Example</h4>
+
+    <pre><span>
+    PUT games/128
+    {
+        "UserToken": "9eb536af-50a1-476f-856e-ffff8f1b25d2",
+        "Word": "triple"
+    }
+    </span></pre>
+
+    <h4>Response</h4>
+
+    <pre><span>
+    Status: 200 OK
+    {
+        "Score": 3
+    }
+    </span></pre>
+
+    <p>&nbsp;</p>
+
+    <h2>Game Status</h2>
+
+    <p>
+        Get game status information.
+        <ul>
+            <li>
+                If GameID is invalid, responds with status 403 (Forbidden).
+            </li>
+            <li>
+                Otherwise, returns information about the game named by GameID as illustrated below.  Note that the information returned
+                depends on whether "Brief=yes" was included as a parameter as well as on the state of
+                the game.  Responds with status code 200 (OK).  Note: The Board and Words are not case sensitive.
+            </li>
+        </ul>
+    </p>
+
+    <pre><span>
+    GET games/{GameID}
+    </span></pre>
+
+    <h4>Parameters</h4>
+
+    <table border="1">
+
+        <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+
+        <tr><td>Brief</td><td>string</td><td><b>(Optional)</b> &nbsp;"yes" means brief status, anything else means full status</td></tr>
+
+    </table>
+
+    <h4>Example</h4>
+
+    <pre><span>
+    GET games/128
+    </span></pre>
+
+    <h4>Response (if game is pending)</h4>
+
+    <pre><span>
+    Status: 200 OK
+    {
+        "GameState": "pending"
+    }
+    </span></pre>
+
+    <h4>Response (if game is active or completed and "Brief=yes" was a parameter)</h4>
+
+    <pre><span>
+    Status: 200 OK
+    {
+        "GameState": "active",                   // Or "completed" as appropriate
+        "TimeLeft": 32,                               // This will be 0 if the game is completed
+        "Player1": {
+            "Score": 3,
+        },
+        "Player2": {
+            "Score": 1,
+        },
+    }
+    </span></pre>
+
+    <h4>Response (if game is active and "Brief=yes" was not a parameter)</h4>
+    <pre><span>
+    Status: 200 OK
+    {
+        "GameState": "active",
+        "Board": "ANETIXSRETAPLMON",
+        "TimeLimit": 120,
+        "TimeLeft": 32,
+        "Player1": {
+            "Nickname": "Jack",
+            "Score": 3,
+        },
+        "Player2": {
+            "Nickname": "Jill",
+            "Score": 1,
+        },
+    }
+    </span></pre>
+
+
+    <p>&nbsp;</p>
+
+    <h4>Response (if game is completed and "Brief=yes" was not a parameter)</h4>
+    <pre><span>
+    Status: 200 OK
+    {
+        "GameState": "completed",
+        "Board": "ANETIXSRETAPLMON",
+        "TimeLimit": 120,
+        "TimeLeft": 0,
+        "Player1": {
+            "Nickname": "Jack",
+            "Score": 3,
+            "WordsPlayed": [ 
+                {"Word": "tine", "Score": 1},
+                {"Word": "strap", "Score": 2} 
+            ],
+        },
+        "Player2": {
+            "Nickname": "Jill",
+            "Score": 1,
+            "WordsPlayed": [ 
+                {"Word": "tin", "Score": 1}
+            ],
+        },
+    }
+    </span></pre>
+
+</body>
+</html>
