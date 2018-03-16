@@ -73,7 +73,7 @@ namespace BoggleClient
                 fetchDataFromServer();
             };
             t.Interval = 1000;
-            EventSetup();        
+            EventSetup();          
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace BoggleClient
             window.RegisterEvent += HandleRegisterAsync;
             window.CancelRegisterEvent += HandleCancelRegister;
             window.RequestEvent += HandleRequestAsync;
-            window.CancelRequestEvent += HandleCancelRequest;
+            window.CancelRequestEvent += HandleCancelRequestAsync;
             window.WordEnteredEvent += HandleWordEntered;
         }
 
@@ -155,7 +155,6 @@ namespace BoggleClient
             try
             {
                 window.RequestEnabled = false;
-                //needs a method to diable proper controles
                 using (HttpClient client = CreateClient(domain))
                 {
                     dynamic user = new ExpandoObject();
@@ -179,10 +178,11 @@ namespace BoggleClient
                         temp = JsonConvert.DeserializeObject(result);
 
                         gameState = "pending";
-                        if (response.StatusCode.Equals(202))
-                            isPlayer1 = true;
-                        else
+
+                        if ("active".Equals((string)temp.GameState))
                             isPlayer1 = false;
+                        else
+                            isPlayer1 = true;
 
                         t.Enabled = true;                
                     }
@@ -199,11 +199,34 @@ namespace BoggleClient
             {
             }
         }
-        /// <summary>
-        /// Cancels the current request operation
-        /// </summary>
-        private void HandleCancelRequest()
+
+        private async void HandleCancelRequestAsync()
         {
+            try
+            {
+                using (HttpClient client = CreateClient(domain))
+                {
+                    dynamic user = new ExpandoObject();
+                    user.UserToken = userToken;
+
+                    tokenSource = new CancellationTokenSource();
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PutAsync("games" , content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        window.RequestEnabled = true;
+                        window.CancleRequestEnabled = false;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Error registering: " + response.StatusCode + "\n" + response.ReasonPhrase);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
             tokenSource.Cancel();
         }
 
@@ -229,7 +252,11 @@ namespace BoggleClient
                     {
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
-                        //window.Score = (string)temp.Score;
+                        int score = int.Parse((string)temp.Score);
+                        {
+                            words+=word+" ("+score+")\n";
+                            window.Wordlist = words;
+                        }
                     }
                     else
                     {
@@ -266,6 +293,7 @@ namespace BoggleClient
                         {
                             window.BoardEnabled = true;
                             window.CancleRequestEnabled = false;
+
                             window.Time = (string)temp.TimeLeft;
                             window.LoadBoard((string)temp.Board);
 
@@ -296,6 +324,15 @@ namespace BoggleClient
                                 window.Score = (string)temp.Player2.Score;
                                 window.Player2Score = (string)temp.Player1.Score;
                             }
+                        }
+                        else if ("complete".Equals((string)temp.GameState) && gameState.Equals("active"))
+                        {
+                            gameState = "complete";
+
+                        }
+                        else
+                        {
+                            
                         }
                     }
                     else
