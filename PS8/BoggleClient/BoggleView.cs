@@ -11,14 +11,14 @@ using System.Windows.Forms;
 namespace BoggleClient
 {
     /// <summary>
-    /// Window for BoggleClient
+    /// View for BoggleClient
     /// </summary>  
-    public partial class BoggleWindow : Form, IBoggleView
+    public partial class BoggleView : Form, IBoggleView
     {
         /// <summary>
-        /// Creates the window
+        /// Creates the view
         /// </summary>
-        public BoggleWindow()
+        public BoggleView()
         {
             InitializeComponent();
         }
@@ -31,10 +31,13 @@ namespace BoggleClient
         private void Help_Click(object sender, EventArgs e)
         {
             MessageBox.Show("How to use Client: \n" +
-                                "\t 1) Provide a server domain and name, then hit register \n" +
-                                "\t 2) Provide the desired time(seconds) to play the game \n" +
-                                "\t 3) Proceed to request a user to play with\n" +
-                                "\t 4) The game starts when a user is found\n", "Help Box");
+                                "1) Provide a server domain and name, then hit register \n" +
+                                "2) Provide the desired time(seconds) to play the game \n" +
+                                "3) Proceed to request a user to play with\n" +
+                                "4) Press cancel request to exit pending game \n" +
+                                "5) Players' score and word lists are shown when game ends \n" +
+                                "6) Press cancel request to exit current game \n" +
+                                "7) Re-enter the time to play a new game", "Help Box");
         }
 
         /// <summary>
@@ -152,6 +155,11 @@ namespace BoggleClient
         /// Contains the strings/words entered by both the users
         /// </summary>
         public string Wordlist { set => WordList.Text = value; }
+
+        /// <summary>
+        /// Textbox to enter a word for the user
+        /// </summary>
+        public string EnterWordBox { set => WordBox.Text = value; }
 
         /// <summary>
         /// Identify when the Register button is active or not

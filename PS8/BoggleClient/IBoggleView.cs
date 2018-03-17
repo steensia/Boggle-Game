@@ -44,6 +44,11 @@ namespace BoggleClient
         String Wordlist { set; }
 
         /// <summary>
+        /// Textbox to enter a word for the user
+        /// </summary>
+        String EnterWordBox { set; }
+
+        /// <summary>
         /// Identify when the Register button is active or not
         /// </summary>
         bool RegisterEnabled { set; }

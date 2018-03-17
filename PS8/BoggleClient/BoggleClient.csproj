@@ -48,18 +48,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoggleWindow.cs">
+    <Compile Include="BoggleView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BoggleWindow.Designer.cs">
-      <DependentUpon>BoggleWindow.cs</DependentUpon>
+    <Compile Include="BoggleView.Designer.cs">
+      <DependentUpon>BoggleView.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="IBoggleView.cs" />
     <Compile Include="Launcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="BoggleWindow.resx">
-      <DependentUpon>BoggleWindow.cs</DependentUpon>
+    <EmbeddedResource Include="BoggleView.resx">
+      <DependentUpon>BoggleView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

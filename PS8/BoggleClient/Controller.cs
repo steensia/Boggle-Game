@@ -17,9 +17,9 @@ namespace BoggleClient
     class Controller
     {
         /// <summary>
-        /// The window controlled by this Controller
+        /// The view controlled by this Controller
         /// </summary>
-        private IBoggleView window;
+        private IBoggleView view;
 
         /// <summary>
         /// The timer for the game
@@ -64,17 +64,20 @@ namespace BoggleClient
         /// </summary>
         private bool isPlayer1;
 
+        /// <summary>
+        /// Used for thread locking
+        /// </summary>
         private object test;
 
 
         /// <summary>
-        /// Creates controller for the provided window
+        /// Creates controller for the provided view
         /// Commences a new Boggle game and sets up the event handlers
         /// </summary>
-        /// <param name="window"></param>
-        public Controller(IBoggleView window)
+        /// <param name="view"></param>
+        public Controller(IBoggleView view)
         {
-            this.window = window;
+            this.view = view;
 
             test = new Object();
 
@@ -97,11 +100,11 @@ namespace BoggleClient
         /// </summary>
         private void EventSetup()
         {
-            window.RegisterEvent += HandleRegisterAsync;
-            window.CancelRegisterEvent += HandleCancelRegister;
-            window.RequestEvent += HandleRequestAsync;
-            window.CancelRequestEvent += HandleCancelRequestAsync;
-            window.WordEnteredEvent += HandleWordEntered;
+            view.RegisterEvent += HandleRegisterAsync;
+            view.CancelRegisterEvent += HandleCancelRegister;
+            view.RequestEvent += HandleRequestAsync;
+            view.CancelRequestEvent += HandleCancelRequestAsync;
+            view.WordEnteredEvent += HandleWordEntered;
         }
 
         /// <summary>
@@ -113,32 +116,34 @@ namespace BoggleClient
         {
             try
             {
-
-                //needs a method to diable proper controles
                 using (HttpClient client = CreateClient(domain))
                 {
+                    // Create the parameter
                     dynamic user = new ExpandoObject();
                     user.Nickname = name;
 
-                    window.RegisterEnabled = false;
+                    view.RegisterEnabled = false;
 
+                    // Compose and send the request.
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-                    window.CancelEnabled = true;
+                    view.CancelEnabled = true;
                     HttpResponseMessage response = await client.PostAsync("users", content, tokenSource.Token);
 
+                    // Deal with the response
                     if (response.IsSuccessStatusCode)
                     {
-                        window.CancelEnabled = false;
+                        view.CancelEnabled = false;
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
 
+                        // Wait for thread to finish and enable some features
                         lock (test)
                         {
                             userToken = (string)(temp.UserToken);
                             this.domain = domain;
-                            window.TimeEnabled = true;
-                            window.RequestEnabled = true;
+                            view.TimeEnabled = true;
+                            view.RequestEnabled = true;
                         }
                     }
                     else
@@ -151,10 +156,11 @@ namespace BoggleClient
             {
 
             }
+
             finally
             {
-                window.CancelEnabled = false;
-                window.RegisterEnabled = true;
+                view.CancelEnabled = false;
+                view.RegisterEnabled = true;
             }
         }
 
@@ -177,17 +183,20 @@ namespace BoggleClient
             {
                 using (HttpClient client = CreateClient(domain))
                 {
+                    // Create the parameter
                     dynamic user = new ExpandoObject();
                     user.UserToken = userToken;
                     user.TimeLimit = time;
 
-                    window.RequestEnabled = false;
-                    window.CancelRequestEnabled = true;
+                    view.RequestEnabled = false;
+                    view.CancelRequestEnabled = true;
 
+                    // Compose and send the request
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync("games", content, tokenSource.Token);
 
+                    // Deal with the response
                     if (response.IsSuccessStatusCode)
                     {
                         String result = await response.Content.ReadAsStringAsync();
@@ -200,6 +209,7 @@ namespace BoggleClient
                         result = await response.Content.ReadAsStringAsync();
                         temp = JsonConvert.DeserializeObject(result);
 
+                        // Wait for thread to finish and enable/disable some features
                         lock (test)
                         {
                             gameState = "pending";
@@ -209,23 +219,20 @@ namespace BoggleClient
                             else
                                 isPlayer1 = true;
 
-                            window.RegisterEnabled = false;
-                            window.TimeEnabled = false;
+                            view.RegisterEnabled = false;
+                            view.TimeEnabled = false;
                             timer.Enabled = true;
                         }
                     }
                     else
                     {
-                        window.RequestEnabled = true;
-                        window.CancelRequestEnabled = false;
+                        view.RequestEnabled = true;
+                        view.CancelRequestEnabled = false;
                         MessageBox.Show("Error joining game: " + response.StatusCode + "\n" + response.ReasonPhrase);
                     }
                 }
             }
             catch (TaskCanceledException)
-            {
-            }
-            finally
             {
             }
         }
@@ -244,11 +251,13 @@ namespace BoggleClient
 
                     timer.Enabled = false;
 
+                    // Compose and send the request
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PutAsync("games", content);
 
-                    lock(test)
+                    // Wait for thread to finish and reset the game
+                    lock (test)
                         Reset();
                 }
             }
@@ -268,24 +277,28 @@ namespace BoggleClient
             {
                 using (HttpClient client = CreateClient(domain))
                 {
+                    // Create the parameter
                     dynamic user = new ExpandoObject();
                     user.UserToken = userToken;
                     user.Word = word;
 
+                    // Compose and send the request.
                     tokenSource = new CancellationTokenSource();
                     StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PutAsync("games/" + gameID, content, tokenSource.Token);
 
+                    // Deal with the response
                     if (response.IsSuccessStatusCode)
                     {
                         String result = await response.Content.ReadAsStringAsync();
+
+                        // Wait for thread to finish and display score and words
                         lock (test)
                         {
                             dynamic temp = JsonConvert.DeserializeObject(result);
                             int score = int.Parse((string)temp.Score);
                             words += word + " (" + score + ")\n";
-                            window.Wordlist = words;
-                            
+                            view.Wordlist = words;
                         }
                     }
                     else
@@ -311,12 +324,14 @@ namespace BoggleClient
                 {
                     HttpResponseMessage response = await client.GetAsync("games/" + gameID);
 
+                    // Deal with the response
                     if (response.IsSuccessStatusCode)
                     {
                         String result = await response.Content.ReadAsStringAsync();
                         dynamic temp = JsonConvert.DeserializeObject(result);
                         dynamic op, player;
 
+                        // Wait for thread to finish and display game over features
                         lock (test)
                         {
                             if (isPlayer1)
@@ -336,24 +351,24 @@ namespace BoggleClient
                             }
                             else if ("active".Equals((string)temp.GameState) && gameState.Equals("pending"))
                             {
-                                window.BoardEnabled = true;
+                                view.BoardEnabled = true;
 
 
-                                window.Time = (string)temp.TimeLeft;
-                                window.LoadBoard((string)temp.Board);
+                                view.Time = (string)temp.TimeLeft;
+                                view.LoadBoard((string)temp.Board);
 
-                                window.Score = (string)player.Score;
-                                window.Player2 = (string)op.Nickname;
-                                window.Player2Score = (string)op.Score;
+                                view.Score = (string)player.Score;
+                                view.Player2 = (string)op.Nickname;
+                                view.Player2Score = (string)op.Score;
 
                                 gameState = "active";
                             }
                             else if ("active".Equals((string)temp.GameState) && gameState.Equals("active"))
                             {
-                                window.Time = temp.TimeLeft;
+                                view.Time = temp.TimeLeft;
 
-                                window.Score = (string)player.Score;
-                                window.Player2Score = (string)op.Score;
+                                view.Score = (string)player.Score;
+                                view.Player2Score = (string)op.Score;
 
                             }
                             else if ("completed".Equals((string)temp.GameState) && gameState.Equals("active"))
@@ -366,6 +381,7 @@ namespace BoggleClient
 
                                 string message = "GAMEOVER\n";
 
+                                // Display both players' name, score, and wordlist
                                 message += "\nPlayer1 - " + (string)player.Nickname + ": " + (string)player.Score + " pts.\n";
 
                                 foreach (dynamic s in myWords)
@@ -379,12 +395,10 @@ namespace BoggleClient
                                 MessageBox.Show(message);
 
                                 timer.Enabled = false;
-                                window.BoardEnabled = false;
-
+                                view.BoardEnabled = false;
                             }
                             else if ("completed".Equals((string)temp.GameState) && gameState.Equals("completed"))
                             {
-
                             }
                             else
                             {
@@ -405,19 +419,23 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Helper method to reset all but username/domain for starting a new game
+        /// </summary>
         private void Reset()
         {
-            window.RequestEnabled = true;
-            window.CancelRequestEnabled = false;
-            window.TimeEnabled = true;
-            window.Time = "";
-            window.RegisterEnabled = true;
-            window.Score = "";
-            window.Player2 = "";
-            window.Player2Score = "";
-            window.BoardEnabled = false;
-            window.Wordlist = "";
-            window.LoadBoard("");
+            view.RequestEnabled = true;
+            view.CancelRequestEnabled = false;
+            view.TimeEnabled = true;
+            view.Time = "";
+            view.RegisterEnabled = true;
+            view.Score = "";
+            view.Player2 = "";
+            view.Player2Score = "";
+            view.BoardEnabled = false;
+            view.Wordlist = "";
+            view.EnterWordBox = "";
+            view.LoadBoard("");
             this.words = "";
             this.gameState = "completed";
             this.gameID = "";
