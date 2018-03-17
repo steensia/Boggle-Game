@@ -373,6 +373,10 @@ namespace BoggleClient
                             }
                             else if ("completed".Equals((string)temp.GameState) && gameState.Equals("active"))
                             {
+                                view.Time = temp.TimeLeft;
+                                view.Score = (string)player.Score;
+                                view.Player2Score = (string)op.Score;
+
                                 gameState = "completed";
                                 List<dynamic> myWords = new List<dynamic>(), opWords = new List<dynamic>();
 

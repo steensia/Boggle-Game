@@ -69,7 +69,10 @@ namespace BoggleClient
         {
             if (int.TryParse(TimerBox.Text, out int time))
             {
-                RequestEvent?.Invoke(time);
+                if (time >= 5 && time <= 120)
+                    RequestEvent?.Invoke(time);
+                else
+                    MessageBox.Show("The time needs to be between 5 and 120 seconds");
             }
             else
             {
@@ -101,6 +104,10 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Enable/Disables features of Username, Domain, and register button
+        /// </summary>
+        /// <param name="b"></param>
         private void RegistrationEnabled(bool b)
         {
             RegisterButton.Enabled = b;
