@@ -156,7 +156,10 @@ namespace BoggleClient
             {
 
             }
+            catch
+            {
 
+            }
             finally
             {
                 view.CancelEnabled = false;
