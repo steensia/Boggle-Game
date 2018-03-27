@@ -19,14 +19,6 @@ namespace Boggle
         Stream API();
 
         /// <summary>
-        /// Returns the nth word from dictionary.txt.  If there is
-        /// no nth word, responds with code 403. This is a demo;
-        /// you can delete it.
-        /// </summary>
-        //[WebGet(UriTemplate = "/word?index={n}")]
-        //string WordAtIndex(int n);
-
-        /// <summary>
         /// Create a new user.
         /// If Nickname is null, or is empty when trimmed, or contains more than 50 characters when trimmed, responds with status 403 (Forbidden).
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname. The returned UserToken should be used to identify the 
@@ -52,6 +44,22 @@ namespace Boggle
         /// If UserToken is invalid or is not a player in the pending game, responds with status 403 (Forbidden).
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
-        void CancelJoin(string user);
+        void CancelJoin(TimeInfo user);
+
+        /// Play a word in a game.
+        /// If Word is null or empty or longer than 30 characters when trimmed, or if GameID or UserToken is invalid, or if UserToken is not a player in the 
+        /// game identified by GameID, responds with response code 403 (Forbidden).
+        /// Otherwise, if the game state is anything other than "active", responds with response code 409 (Conflict).
+        /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by GameID. Returns the score for Word in the context of the 
+        /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
+        [WebInvoke(Method = "PUT", UriTemplate = "/games/{gameID}")]
+        int PlayWord(Player user, string gameID);
+
+        /// Get game status information.
+        /// If GameID is invalid, responds with status 403 (Forbidden).
+        /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
+        /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
+        [WebGet(UriTemplate = "/games/{gameID}?brief={brief}")]
+        IList<GameStatus> GameStatus(string gameID, string brief);
     }
 }
