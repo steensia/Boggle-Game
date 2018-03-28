@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,10 +18,9 @@ namespace Boggle
         // simultaneously in the service).  The entire state is lost each time
         // the service shuts down, so eventually we'll need to port this to
         // a proper database.
-        private readonly static Dictionary<String, UserInfo> users = new Dictionary<String, UserInfo>();
-        private readonly static Dictionary<String, TimeInfo> time = new Dictionary<String, TimeInfo>();
-        private readonly static Dictionary<String, Player> player = new Dictionary<String, Player>();
-        private readonly static Dictionary<String, GameStatus> game = new Dictionary<String, GameStatus>();
+        private readonly static Dictionary<String, Player> players = new Dictionary<String, Player>();
+        private readonly static Dictionary<String, GameStatus> games = new Dictionary<String, GameStatus>();
+        private static string pendingGame;
         private static readonly object sync = new object();
 
         /// <summary>
@@ -49,26 +50,27 @@ namespace Boggle
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname. The returned UserToken should be used to identify the 
         /// user in subsequent requests. Responds with status 201 (Created).
         /// </summary>
-        public string CreateUser(UserInfo u)
+        public User CreateUser(Username u)
         {
             lock (sync)
             {
-                if (u.Nickname == null || u.Nickname.Trim().Length == 0)
+                if (u.Nickname == null || u.Nickname.Trim().Length == 0 || u.Nickname.Trim().Length > 50)
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
                 else
                 {
-                    string userToken = Guid.NewGuid().ToString();
-                    users.Add(userToken, u);
-                    TimeInfo temp = new TimeInfo();
-                    {
-                        temp.UserToken = userToken;
-                    }
-                    time.Add(userToken, temp);
+                    User user = new User();
+                    user.UserToken = Guid.NewGuid().ToString();
+
+                    Player player = new Player();
+                    player.Nickname = u.Nickname;
+                    player.UserToken = user.UserToken;
+
+                    players.Add(user.UserToken, player);
                     SetStatus(Created);
-                    return userToken;
+                    return user;
                 }
             }
         }
@@ -83,69 +85,91 @@ namespace Boggle
         /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending game's requested time limit. Returns the 
         /// pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
-        public string JoinGame(TimeInfo t)
+        public GameRoom JoinGame(GameInfo g)
         {
-            if (t.UserToken == null || !users.ContainsKey(t.UserToken) || t.TimeLimit < 5 || t.TimeLimit > 120)
+            lock (sync)
             {
-                SetStatus(Forbidden);
-                return null;
-            }
-            else if (game.Count > 0)
-            {
-                SetStatus(Conflict);
-                return null;
-            }
-            else if (game.Count < 0)
-            {
-                string gameID = Guid.NewGuid().ToString();
-                GameStatus currentGame = new GameStatus();
+                if (games.Count < 1 || pendingGame == null)
                 {
-                    currentGame.GameState = "active";
-                    var first = users.First();
-                    time.TryGetValue(first.Key, out TimeInfo temp);
-                    currentGame.TimeLimit = (t.TimeLimit + temp.TimeLimit) / 2;
-                };
+                    games.Add(pendingGame = uniqueGameID(), new GameStatus());
+                }
+                if (g.UserToken == null || !players.ContainsKey(g.UserToken) || g.TimeLimit < 5 || g.TimeLimit > 120)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                else if (games.TryGetValue(pendingGame, out GameStatus game) && players.TryGetValue(g.UserToken, out Player player))
+                {
+                    if (game.Player1 != null && g.UserToken.Equals(game.Player1.UserToken))
+                    {
+                        SetStatus(Conflict);
+                        return null;
+                    }
+                    else if (game.Player1 == null)
+                    {
+                        GameRoom room = new GameRoom();
+                        room.GameID = pendingGame;
 
-                currentGame.Player2.UserToken = t.UserToken;
 
-                GameStatus newGame = new GameStatus();
-                {
-                    newGame.GameState = "pending";
-                };
-                game.Add(gameID, currentGame);
-                time.Add(t.TimeLimit.ToString(), t);
-                SetStatus(Created);
-                return gameID;
-            }
-            else
-            {
-                string gameID = Guid.NewGuid().ToString();
-                GameStatus currentGame = new GameStatus();
-                {
-                    currentGame.GameState = "pending";
-                    currentGame.Player1.UserToken = t.UserToken;
-                    currentGame.TimeLimit = t.TimeLimit;
-                };
-                game.Add(gameID, currentGame);
-                time.Add(t.TimeLimit.ToString(), t);
-                SetStatus(Accepted);
-                return gameID;
+                        games.TryGetValue(pendingGame, out GameStatus temp);
+
+                        players.TryGetValue(g.UserToken, out Player player1);
+
+                        games.Remove(pendingGame);
+
+                        temp.Player1 = player1;
+                        temp.TimeLimit = g.TimeLimit;
+                        temp.GameState = "pending";
+
+                        games.Add(pendingGame,temp);
+
+                        SetStatus(Accepted);
+                        return room;
+                    }
+                    else
+                    {
+                        GameRoom room = new GameRoom();
+                        room.GameID = pendingGame;
+
+                        games.TryGetValue(pendingGame, out GameStatus temp);
+
+                        games.Remove(pendingGame);
+
+                        players.TryGetValue(g.UserToken, out Player player2);
+                        temp.Player2 = player2;
+                        temp.TimeLimit = (game.TimeLimit + g.TimeLimit) / 2;
+                        temp.GameState = "active";
+
+                        games.Add(pendingGame, temp);
+
+                        games.Add(pendingGame = uniqueGameID(), new GameStatus());
+
+                        SetStatus(Created);
+                        return room;
+                    }
+                }
+                return null;
             }
         }
 
         /// Cancel a pending request to join a game.
         /// If UserToken is invalid or is not a player in the pending game, responds with status 403 (Forbidden).
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
-        public void CancelJoin(TimeInfo t)
+        public void CancelJoin(User u)
         {
-            if (t.UserToken == null || !users.ContainsKey(t.UserToken))
+            lock (sync)
             {
-                SetStatus(Forbidden);
-            }
-            else
-            {
-                time.Remove(t.UserToken);
-                SetStatus(OK);
+                if (u.UserToken == null || !players.ContainsKey(u.UserToken) || pendingGame == null || !games.TryGetValue(pendingGame, out GameStatus g) || g.Player1 == null || !u.UserToken.Equals(g.Player1.UserToken))
+                {
+                    SetStatus(Forbidden);
+                }
+                else
+                {
+                    games.Remove(pendingGame);
+                    g.Player1 = null;
+                    games.Add(pendingGame, g);
+                    SetStatus(OK);
+                }
             }
         }
 
@@ -155,34 +179,18 @@ namespace Boggle
         /// Otherwise, if the game state is anything other than "active", responds with response code 409 (Conflict).
         /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by GameID. Returns the score for Word in the context of the 
         /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
-        public int PlayWord(Player p, string gameID)
+        public WordScore PlayWord(WordToPlay w, string gameID)
         {
-            if (p.PlayWord == null || p.PlayWord.Trim().Length > 30 || p.GameID == null 
-                || p.UserToken == null || !users.ContainsKey(p.UserToken) || !game.ContainsKey(p.UserToken))
-            {
-                SetStatus(Forbidden);
-                return 0;
-            }
-            else if (game[p.UserToken].GameState.Equals("active"))
-            {
-                SetStatus(Conflict);
-                return 0;
-            }
-            else
-            {
-                Int32.TryParse(Guid.NewGuid().ToString(), out int score);
-                SetStatus(OK);
-                return score;
-            }
+            return null;
         }
 
         /// Get game status information.
         /// If GameID is invalid, responds with status 403 (Forbidden).
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
-        public IList<GameStatus> GameStatus(string gameID, string brief)
+        public GameStatus GameStatus(string gameID, string brief)
         {
-            if (gameID == null || !game.ContainsKey(gameID))
+            if (gameID == null || !games.ContainsKey(gameID))
             {
                 SetStatus(Forbidden);
                 return null;
@@ -191,7 +199,7 @@ namespace Boggle
             {
                 SetStatus(OK);
                 IList<GameStatus> stats = new List<GameStatus>();
-                foreach (var status in game.Values)
+                foreach (var status in games.Values)
                 {
                     // Display the following: GameState, TimeLeft, Player1/Player2 Scores
                     if ((status.GameState.Equals("active") || status.GameState.Equals("completed")) && brief.Equals("yes"))
@@ -209,8 +217,15 @@ namespace Boggle
 
                     }
                 }
-                return stats;
+                return null;
             }
+        }
+
+        private string uniqueGameID()
+        {
+            string i = null;
+            while (games.Keys.Contains(i = "G"+(new object().GetHashCode()%512 + 1)));
+            return i;
         }
     }
 }
