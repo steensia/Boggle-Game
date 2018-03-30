@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 
 namespace Boggle
@@ -46,25 +47,37 @@ namespace Boggle
 
     //game status
 
+    [DataContract]
     public class GameStatus
     {
+        [DataMember]
         public string GameState { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public string Board { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLeft { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public Player Player1 { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public Player Player2 { get; set; }
     }
 
-
+    [DataContract]
     public class Player
     {
-        public string Nickname { get; set; }
+        [DataMember]
         public int Score { get; set; }
+        [DataMember(EmitDefaultValue = false)]
+        public string Nickname { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public List<Words> WordsPlayed { get; set; }
+        [DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
     }
 
+    [DataContract]
     public class Words
     {
     public string Word { get; set; }

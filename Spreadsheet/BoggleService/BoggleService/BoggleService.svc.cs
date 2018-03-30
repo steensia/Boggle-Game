@@ -61,14 +61,17 @@ namespace Boggle
                 }
                 else
                 {
+                    // Generate usertoken
                     User user = new User();
                     user.UserToken = Guid.NewGuid().ToString();
 
+                    // Create new player and add usertoken and nickname
                     Player player = new Player();
                     player.Nickname = u.Nickname;
                     player.UserToken = user.UserToken;
 
                     players.Add(user.UserToken, player);
+
                     SetStatus(Created);
                     return user;
                 }
@@ -89,6 +92,7 @@ namespace Boggle
         {
             lock (sync)
             {
+                // Create pending game
                 if (games.Count < 1 || pendingGame == null)
                 {
                     games.Add(pendingGame = uniqueGameID(), new GameStatus());
@@ -98,8 +102,10 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return null;
                 }
+
                 else if (games.TryGetValue(pendingGame, out GameStatus game) && players.TryGetValue(g.UserToken, out Player player))
                 {
+                    // Conflict if same user joins game
                     if (game.Player1 != null && g.UserToken.Equals(game.Player1.UserToken))
                     {
                         SetStatus(Conflict);
@@ -107,21 +113,22 @@ namespace Boggle
                     }
                     else if (game.Player1 == null)
                     {
+                        // Create new game 
                         GameRoom room = new GameRoom();
                         room.GameID = pendingGame;
 
-
-                        games.TryGetValue(pendingGame, out GameStatus temp);
+                        games.TryGetValue(pendingGame, out GameStatus newGame);
 
                         players.TryGetValue(g.UserToken, out Player player1);
 
                         games.Remove(pendingGame);
 
-                        temp.Player1 = player1;
-                        temp.TimeLimit = g.TimeLimit;
-                        temp.GameState = "pending";
+                        // Add usertoken as first player in pending game  
+                        newGame.Player1 = player1;
+                        newGame.TimeLimit = g.TimeLimit;
+                        newGame.GameState = "pending";
 
-                        games.Add(pendingGame,temp);
+                        games.Add(pendingGame,newGame);
 
                         SetStatus(Accepted);
                         return room;
@@ -131,17 +138,19 @@ namespace Boggle
                         GameRoom room = new GameRoom();
                         room.GameID = pendingGame;
 
-                        games.TryGetValue(pendingGame, out GameStatus temp);
+                        games.TryGetValue(pendingGame, out GameStatus currentGame);
 
                         games.Remove(pendingGame);
 
+                        // Adds usertoken as second player in active game
                         players.TryGetValue(g.UserToken, out Player player2);
-                        temp.Player2 = player2;
-                        temp.TimeLimit = (game.TimeLimit + g.TimeLimit) / 2;
-                        temp.GameState = "active";
+                        currentGame.Player2 = player2;
+                        currentGame.TimeLimit = (game.TimeLimit + g.TimeLimit) / 2;
+                        currentGame.GameState = "active";
 
-                        games.Add(pendingGame, temp);
+                        games.Add(pendingGame, currentGame);
 
+                        // Create new pending game.
                         games.Add(pendingGame = uniqueGameID(), new GameStatus());
 
                         SetStatus(Created);
@@ -168,6 +177,7 @@ namespace Boggle
                     games.Remove(pendingGame);
                     g.Player1 = null;
                     games.Add(pendingGame, g);
+
                     SetStatus(OK);
                 }
             }
@@ -181,7 +191,35 @@ namespace Boggle
         /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
         public WordScore PlayWord(WordToPlay w, string gameID)
         {
-            return null;
+            lock (sync)
+            {
+                if (w.Word == null || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !games.ContainsKey(gameID) || (games.TryGetValue(gameID, out GameStatus temp) && (temp.Player1.UserToken != w.UserToken || temp.Player2.UserToken != w.UserToken)))
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                else if (games.TryGetValue(gameID, out GameStatus g) && !g.GameState.Equals("active"))
+                {
+                    SetStatus(Conflict);
+                    return null;
+                }
+                else
+                {
+                    Words wordPlay = new Words();
+                    wordPlay.Word = w.Word;
+                    // Need to work on this
+                    wordPlay.Score = 0;
+
+                    WordScore scoreWord = new WordScore();
+                    scoreWord.Score = wordPlay.Score;
+
+                    players.TryGetValue(w.UserToken, out Player p);
+                    p.WordsPlayed.Add(wordPlay);
+
+                    SetStatus(OK);
+                    return scoreWord;
+                }
+            }
         }
 
         /// Get game status information.
@@ -190,37 +228,48 @@ namespace Boggle
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         public GameStatus GameStatus(string gameID, string brief)
         {
-            if (gameID == null || !games.ContainsKey(gameID))
+            lock (sync)
             {
-                SetStatus(Forbidden);
-                return null;
-            }
-            else
-            {
-                SetStatus(OK);
-                IList<GameStatus> stats = new List<GameStatus>();
-                foreach (var status in games.Values)
+                if (gameID == null || !games.ContainsKey(gameID))
                 {
-                    // Display the following: GameState, TimeLeft, Player1/Player2 Scores
-                    if ((status.GameState.Equals("active") || status.GameState.Equals("completed")) && brief.Equals("yes"))
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                else
+                {
+                    games.TryGetValue(gameID, out GameStatus temp);
+                    // Display pending status
+                    if (temp.GameState.Equals("pending"))
                     {
-
+                        SetStatus(OK);
+                        return temp;
+                    }
+                    // Display the following: GameState, TimeLeft, Player1/Player2 Scores
+                    if ((temp.GameState.Equals("active") || temp.GameState.Equals("completed")) && brief.Equals("yes"))
+                    {
+                        SetStatus(OK);
+                        return temp;
                     }
                     // Display the following: GameState, Board, TimeLimit, TimeLeft, Player1/Player2 Nicknames/Scores
-                    else if (status.GameState.Equals("active") && !brief.Equals("yes"))
+                    else if (temp.GameState.Equals("active") && !brief.Equals("yes"))
                     {
-
+                        SetStatus(OK);
+                        return temp;
                     }
                     // Display the following: GameState, Board, TimeLimit, TimeLeft, Player1/Player2 Nicknames/Scores/WordsPlayed
-                    else if (status.GameState.Equals("completed") && !brief.Equals("yes"))
+                    // Game is complete and parameter was not yes
+                    else
                     {
-
+                        SetStatus(OK);
+                        return temp;
                     }
                 }
-                return null;
             }
         }
 
+        /// <summary>
+        /// Private helper method to generate game ID
+        /// </summary>
         private string uniqueGameID()
         {
             string i = null;
