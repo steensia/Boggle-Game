@@ -156,18 +156,20 @@ namespace Boggle
                         room.GameID = pendingGame;
 
                         games.TryGetValue(pendingGame, out GameStatus currentGame);
-
                         games.Remove(pendingGame);
 
                         // Add first and second player, and time information to GameStatus
                         players.TryGetValue(g.UserToken, out Player player2);
-                        currentGame.Player2 = player2;
-                        currentGame.Player1.WordsPlayed = new List<Words>();
-                        currentGame.Player2.WordsPlayed = new List<Words>();
+                     
                         currentGame.TimeLimit = (game.TimeLimit + g.TimeLimit) / 2;
-                        times.Add(pendingGame, System.DateTime.UtcNow.Ticks);
                         currentGame.TimeLeft = currentGame.TimeLimit;
+                        times.Add(pendingGame, System.DateTime.UtcNow.Ticks);
+
                         currentGame.GameState = "active";
+                        currentGame.Player2 = player2;
+
+                        currentGame.Player1.WordsPlayed = new List<Words>();
+                        currentGame.Player2.WordsPlayed = new List<Words>();                          
 
                         board = new BoggleBoard();
                         currentGame.Board = board.ToString();
@@ -270,7 +272,7 @@ namespace Boggle
         /// If GameID is invalid, responds with status 403 (Forbidden).
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
-        public GameStatus GameStatus(string gameID, string brief)
+        public GameStatusState GameStatus(string gameID, string brief)
         {
             lock (sync)
             {
@@ -290,6 +292,7 @@ namespace Boggle
                     {
                         GameStatusState pendStatus = new GameStatusState();
                         pendStatus.GameState = "pending";
+                        //game.GameState = "pending";
 
                         SetStatus(OK);
                         return pendStatus;
