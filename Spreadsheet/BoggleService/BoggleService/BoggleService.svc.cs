@@ -140,7 +140,7 @@ namespace Boggle
 
                         games.Remove(pendingGame);
 
-                        // Add usertoken as first player in pending game  
+                        // Add information to first player in pending game  
                         newGame.Player1 = player1;
                         newGame.TimeLimit = g.TimeLimit;
                         newGame.GameState = "pending";
@@ -159,7 +159,7 @@ namespace Boggle
 
                         games.Remove(pendingGame);
 
-                        // Adds usertoken as second player in active game
+                        // Add first and second player, and time information to GameStatus
                         players.TryGetValue(g.UserToken, out Player player2);
                         currentGame.Player2 = player2;
                         currentGame.Player1.WordsPlayed = new List<Words>();
@@ -198,6 +198,7 @@ namespace Boggle
                 }
                 else
                 {
+                    // Remove the player's contact to the server
                     games.Remove(pendingGame);
                     g.Player1 = null;
                     games.Add(pendingGame, g);
@@ -238,21 +239,23 @@ namespace Boggle
                         Words wordPlay = new Words();
                         wordPlay.Word = w.Word;
 
-                        // Need to work on this
+                        // Generate boggle board
                         board = new BoggleBoard(g.Board);
                         players.TryGetValue(w.UserToken, out Player p);
 
+                        // Score 0 if the word is less than 3 characters or -1 if it doesn't exist in dic.
                         wordPlay.Score = board.CanBeFormed(wordPlay.Word) ? GetScore(wordPlay.Word) : -1;
-
                         if (wordPlay.Word.Length < 3)
                             wordPlay.Score = 0;
                         else
                             foreach (Words word in p.WordsPlayed)
                                 if (word.Word.ToUpper().Equals(wordPlay.Word.ToUpper())) wordPlay.Score = 0;
 
+                        // Set the appropriate score for each word
                         WordScore scoreWord = new WordScore();
                         scoreWord.Score = wordPlay.Score;
 
+                        // Update the players' scores
                         p.Score += wordPlay.Score;
                         p.WordsPlayed.Add(wordPlay);
 
@@ -281,16 +284,17 @@ namespace Boggle
                     updateTime(gameID);
                     games.TryGetValue(gameID, out GameStatus temp);
                     GameStatus game = new GameStatus();
- 
 
                     // Display pending status
                     if (temp.GameState.Equals("pending"))
                     {
-                        game.GameState = temp.GameState;
+                        GameStatusState pendStatus = new GameStatusState();
+                        pendStatus.GameState = "pending";
 
                         SetStatus(OK);
-                        return game;
+                        return pendStatus;
                     }
+                    // Conceal board, time limit, player nicknames and word lists
                     else if ((temp.GameState.Equals("active")|| temp.GameState.Equals("completed")) && "yes".Equals(brief))
                     {
                         game.GameState = temp.GameState;
@@ -304,6 +308,7 @@ namespace Boggle
 
                         return game;
                     }
+                    // Conceal Players' word lists
                     else if (temp.GameState.Equals("active"))
                     {
                         game.GameState = temp.GameState;
@@ -323,6 +328,7 @@ namespace Boggle
                         return game;
 
                     }
+                    // Display all information
                     else if (temp.GameState.Equals("completed"))
                     {
                         game.GameState = temp.GameState;
@@ -360,6 +366,10 @@ namespace Boggle
             return i;
         }
 
+        /// <summary>
+        /// Private helper method to update the current time
+        /// </summary>
+        /// <param name="gameID"></param>
         private void updateTime(string gameID)
         {
             games.TryGetValue(gameID, out GameStatus temp);
@@ -376,6 +386,12 @@ namespace Boggle
             games.Remove(gameID);
             games.Add(gameID, temp);
         }
+
+        /// <summary>
+        /// Private helper method to receive the score for each word
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         private int GetScore(string s)
         {
             switch (s.Length)
