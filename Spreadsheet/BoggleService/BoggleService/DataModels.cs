@@ -56,7 +56,7 @@ namespace Boggle
         public string Board { get; set; }
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
-        [DataMember(EmitDefaultValue = false)]
+        [DataMember]
         public int TimeLeft { get; set; }
         [DataMember(EmitDefaultValue = false)]
         public Player Player1 { get; set; }
@@ -80,7 +80,9 @@ namespace Boggle
     [DataContract]
     public class Words
     {
-    public string Word { get; set; }
-    public int Score { get; set; }
+        [DataMember]
+        public string Word { get; set; }
+        [DataMember]
+        public int Score { get; set; }
     }
 }
