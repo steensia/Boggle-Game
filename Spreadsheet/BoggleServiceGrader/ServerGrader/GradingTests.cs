@@ -31,8 +31,8 @@ namespace ServerGrader
         private static HttpClient CreateClient()
         {
             HttpClient client = new HttpClient();
-            //client.BaseAddress = new Uri("http://localhost:60000");
-            client.BaseAddress = new Uri("http://ice.eng.utah.edu");
+            client.BaseAddress = new Uri("http://localhost:60000");
+            //client.BaseAddress = new Uri("http://ice.eng.utah.edu");
             return client;
         }
 
