@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -12,12 +14,6 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
-        // This amounts to a "poor man's" database.  The state of the service is
-        // maintained in users and items.  The sync object is used
-        // for synchronization (because multiple threads can be running
-        // simultaneously in the service).  The entire state is lost each time
-        // the service shuts down, so eventually we'll need to port this to
-        // a proper database.
         private readonly static Dictionary<String, Player> players = new Dictionary<String, Player>();
         private readonly static Dictionary<String, GameStatus> games = new Dictionary<String, GameStatus>();
         private readonly static Dictionary<String, long> times = new Dictionary<String, long>();
@@ -27,9 +23,11 @@ namespace Boggle
         private static BoggleBoard board;
         private static string pendingGame;
 
+        private static string BoggleDB;
+        
         static BoggleService()
         {
-
+            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
         public BoggleService()
         {
@@ -79,28 +77,49 @@ namespace Boggle
         /// </summary>
         public User CreateUser(Username u)
         {
-            lock (sync)
-            {
                 if (u.Nickname == null || u.Nickname.Trim().Length == 0 || u.Nickname.Trim().Length > 50)
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
-                else
+            //else
+            //{
+            //    // Generate usertoken
+            //    User user = new User();
+            //    user.UserToken = Guid.NewGuid().ToString();
+
+            //    // Create new player and add usertoken and nickname
+            //    Player player = new Player();
+            //    player.Nickname = u.Nickname;
+            //    player.UserToken = user.UserToken;
+
+            //    players.Add(user.UserToken, player);
+
+            //    SetStatus(Created);
+            //    return user;
+            //}
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    // Generate usertoken
-                    User user = new User();
-                    user.UserToken = Guid.NewGuid().ToString();
+                    using (SqlCommand command = new SqlCommand("insert into Users (UserToken, Nickname) values(@UserToken, @Nickname)",conn, trans))
+                    {
+                        // Generate usertoken
+                        User user = new User();
+                        user.UserToken = Guid.NewGuid().ToString();
 
-                    // Create new player and add usertoken and nickname
-                    Player player = new Player();
-                    player.Nickname = u.Nickname;
-                    player.UserToken = user.UserToken;
+                        command.Parameters.AddWithValue("@UserToken", user.UserToken);
+                        command.Parameters.AddWithValue("@Nickname", u.Nickname.Trim());
 
-                    players.Add(user.UserToken, player);
+                        command.ExecuteNonQuery();
 
-                    SetStatus(Created);
-                    return user;
+                        SetStatus(Created);
+                        trans.Commit();
+                        return user;
+                    }
                 }
             }
         }
