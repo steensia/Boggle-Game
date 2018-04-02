@@ -18,34 +18,31 @@ namespace Boggle
         private readonly static Dictionary<String, GameStatus> games = new Dictionary<String, GameStatus>();
         private readonly static Dictionary<String, long> times = new Dictionary<String, long>();
         private readonly static HashSet<String> validWords = new HashSet<String>();
-        private readonly static object sync = new object();
 
         private static BoggleBoard board;
         private static string pendingGame;
 
         private static string BoggleDB;
-        
+
         static BoggleService()
         {
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
         }
         public BoggleService()
         {
-            lock (sync)
+            if (pendingGame == null)
             {
-                if (pendingGame == null)
+                using (StreamReader words = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
                 {
-                    using (StreamReader words = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
+                    string temp;
+                    while ((temp = words.ReadLine()) != null)
                     {
-                        string temp;
-                        while ((temp = words.ReadLine()) != null)
-                        {
-                            validWords.Add(temp);
-                        }
+                        validWords.Add(temp);
                     }
-                    games.Add(pendingGame = uniqueGameID(), new GameStatus());
                 }
+                games.Add(pendingGame = uniqueGameID(), new GameStatus());
             }
+
         }
 
         /// <summary>
@@ -77,11 +74,11 @@ namespace Boggle
         /// </summary>
         public User CreateUser(Username u)
         {
-                if (u.Nickname == null || u.Nickname.Trim().Length == 0 || u.Nickname.Trim().Length > 50)
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
+            if (u.Nickname == null || u.Nickname.Trim().Length == 0 || u.Nickname.Trim().Length > 50)
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
             //else
             //{
             //    // Generate usertoken
@@ -105,7 +102,7 @@ namespace Boggle
 
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using (SqlCommand command = new SqlCommand("insert into Users (UserToken, Nickname) values(@UserToken, @Nickname)",conn, trans))
+                    using (SqlCommand command = new SqlCommand("insert into Users (UserToken, Nickname) values(@UserToken, @Nickname)", conn, trans))
                     {
                         // Generate usertoken
                         User user = new User();
@@ -136,16 +133,57 @@ namespace Boggle
         /// </summary>
         public GameRoom JoinGame(GameInfo g)
         {
-            lock (sync)
+            if (g.UserToken == null || g.TimeLimit < 5 || g.TimeLimit > 120)
             {
-                // Create pending game
-                if (g.UserToken == null || !players.ContainsKey(g.UserToken) || g.TimeLimit < 5 || g.TimeLimit > 120)
+                SetStatus(Forbidden);
+                return null;
+            }
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-                else if (games.TryGetValue(pendingGame, out GameStatus game) && players.TryGetValue(g.UserToken, out Player player))
-                {
+                    using (SqlCommand command = new SqlCommand("select UserToken from Users where UserToken = @UserToken", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@UsrToken", g.UserToken);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (!reader.HasRows)
+                            {
+                                SetStatus(Forbidden);
+                                trans.Commit();
+                                return null;
+                            }
+                        }
+                    }
+
+                    using (SqlCommand command = new SqlCommand("select GameID from Games where GameID = @GameID", conn, trans))
+                    {
+                        command.Parameters.AddWithValue("@GameID", pendingGame);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            reader.GetValue(0);
+                            if (!reader.HasRows)
+                            {
+                                SetStatus(Forbidden);
+                                trans.Commit();
+                                return null;
+                            }
+                        }
+                    }
+
+
+                    // Create pending game
+
+
+
+                    games.TryGetValue(pendingGame, out GameStatus game);
+                    players.TryGetValue(g.UserToken, out Player player);
+
                     // Conflict if same user joins game
                     if (game.Player1 != null && g.UserToken.Equals(game.Player1.UserToken))
                     {
@@ -183,7 +221,7 @@ namespace Boggle
 
                         // Add first and second player, and time information to GameStatus
                         players.TryGetValue(g.UserToken, out Player player2);
-                     
+
                         currentGame.TimeLimit = (game.TimeLimit + g.TimeLimit) / 2;
                         currentGame.TimeLeft = currentGame.TimeLimit;
                         times.Add(pendingGame, System.DateTime.UtcNow.Ticks);
@@ -192,7 +230,7 @@ namespace Boggle
                         currentGame.Player2 = player2;
 
                         currentGame.Player1.WordsPlayed = new List<Words>();
-                        currentGame.Player2.WordsPlayed = new List<Words>();                          
+                        currentGame.Player2.WordsPlayed = new List<Words>();
 
                         board = new BoggleBoard();
                         currentGame.Board = board.ToString();
@@ -205,8 +243,8 @@ namespace Boggle
                         SetStatus(Created);
                         return room;
                     }
+                    return null;
                 }
-                return null;
             }
         }
 
@@ -215,21 +253,18 @@ namespace Boggle
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
         public void CancelJoin(User u)
         {
-            lock (sync)
+            if (u.UserToken == null || !players.ContainsKey(u.UserToken) || pendingGame == null || !games.TryGetValue(pendingGame, out GameStatus g) || g.Player1 == null || !u.UserToken.Equals(g.Player1.UserToken))
             {
-                if (u.UserToken == null || !players.ContainsKey(u.UserToken) || pendingGame == null || !games.TryGetValue(pendingGame, out GameStatus g) || g.Player1 == null || !u.UserToken.Equals(g.Player1.UserToken))
-                {
-                    SetStatus(Forbidden);
-                }
-                else
-                {
-                    // Remove the player's contact to the server
-                    games.Remove(pendingGame);
-                    g.Player1 = null;
-                    games.Add(pendingGame, g);
+                SetStatus(Forbidden);
+            }
+            else
+            {
+                // Remove the player's contact to the server
+                games.Remove(pendingGame);
+                g.Player1 = null;
+                games.Add(pendingGame, g);
 
-                    SetStatus(OK);
-                }
+                SetStatus(OK);
             }
         }
 
@@ -241,52 +276,48 @@ namespace Boggle
         /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
         public WordScore PlayWord(WordToPlay w, string gameID)
         {
-            lock (sync)
+            if (w.Word == null || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !(games.TryGetValue(gameID, out GameStatus temp) || (temp.Player1.UserToken != w.UserToken || temp.Player2.UserToken != w.UserToken)))
             {
-
-                if (w.Word == null || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !(games.TryGetValue(gameID, out GameStatus temp) || (temp.Player1.UserToken != w.UserToken || temp.Player2.UserToken != w.UserToken)))
+                SetStatus(Forbidden);
+                return null;
+            }
+            else
+            {
+                games.TryGetValue(gameID, out GameStatus g);
+                if (!g.GameState.Equals("active"))
                 {
-                    SetStatus(Forbidden);
+                    SetStatus(Conflict);
                     return null;
                 }
                 else
                 {
-                    games.TryGetValue(gameID, out GameStatus g);
-                    if (!g.GameState.Equals("active"))
-                    {
-                        SetStatus(Conflict);
-                        return null;
-                    }
+                    updateTime(gameID);
+
+                    Words wordPlay = new Words();
+                    wordPlay.Word = w.Word;
+
+                    // Generate boggle board
+                    board = new BoggleBoard(g.Board);
+                    players.TryGetValue(w.UserToken, out Player p);
+
+                    // Score 0 if the word is less than 3 characters or -1 if it doesn't exist in dic.
+                    wordPlay.Score = board.CanBeFormed(wordPlay.Word) ? GetScore(wordPlay.Word) : -1;
+                    if (wordPlay.Word.Length < 3)
+                        wordPlay.Score = 0;
                     else
-                    {
-                        updateTime(gameID);
+                        foreach (Words word in p.WordsPlayed)
+                            if (word.Word.ToUpper().Equals(wordPlay.Word.ToUpper())) wordPlay.Score = 0;
 
-                        Words wordPlay = new Words();
-                        wordPlay.Word = w.Word;
+                    // Set the appropriate score for each word
+                    WordScore scoreWord = new WordScore();
+                    scoreWord.Score = wordPlay.Score;
 
-                        // Generate boggle board
-                        board = new BoggleBoard(g.Board);
-                        players.TryGetValue(w.UserToken, out Player p);
+                    // Update the players' scores
+                    p.Score += wordPlay.Score;
+                    p.WordsPlayed.Add(wordPlay);
 
-                        // Score 0 if the word is less than 3 characters or -1 if it doesn't exist in dic.
-                        wordPlay.Score = board.CanBeFormed(wordPlay.Word) ? GetScore(wordPlay.Word) : -1;
-                        if (wordPlay.Word.Length < 3)
-                            wordPlay.Score = 0;
-                        else
-                            foreach (Words word in p.WordsPlayed)
-                                if (word.Word.ToUpper().Equals(wordPlay.Word.ToUpper())) wordPlay.Score = 0;
-
-                        // Set the appropriate score for each word
-                        WordScore scoreWord = new WordScore();
-                        scoreWord.Score = wordPlay.Score;
-
-                        // Update the players' scores
-                        p.Score += wordPlay.Score;
-                        p.WordsPlayed.Add(wordPlay);
-
-                        SetStatus(OK);
-                        return scoreWord;
-                    }
+                    SetStatus(OK);
+                    return scoreWord;
                 }
             }
         }
@@ -297,88 +328,84 @@ namespace Boggle
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         public GameStatusState GameStatus(string gameID, string brief)
         {
-            lock (sync)
+            if (gameID == null || !games.ContainsKey(gameID))
             {
-                if (gameID == null || !games.ContainsKey(gameID))
+                SetStatus(Forbidden);
+                return null;
+            }
+            else
+            {
+                updateTime(gameID);
+                games.TryGetValue(gameID, out GameStatus temp);
+                GameStatus game = new GameStatus();
+
+                // Display pending status
+                if (temp.GameState.Equals("pending"))
                 {
-                    SetStatus(Forbidden);
-                    return null;
+                    GameStatusState pendStatus = new GameStatusState();
+                    pendStatus.GameState = "pending";
+                    //game.GameState = "pending";
+
+                    SetStatus(OK);
+                    return pendStatus;
                 }
-                else
+                // Conceal board, time limit, player nicknames and word lists
+                else if ((temp.GameState.Equals("active") || temp.GameState.Equals("completed")) && "yes".Equals(brief))
                 {
-                    updateTime(gameID);
-                    games.TryGetValue(gameID, out GameStatus temp);
-                    GameStatus game = new GameStatus();
+                    game.GameState = temp.GameState;
+                    game.TimeLeft = temp.TimeLeft;
 
-                    // Display pending status
-                    if (temp.GameState.Equals("pending"))
-                    {
-                        GameStatusState pendStatus = new GameStatusState();
-                        pendStatus.GameState = "pending";
-                        //game.GameState = "pending";
+                    game.Player1 = new Player();
+                    game.Player1.Score = temp.Player1.Score;
 
-                        SetStatus(OK);
-                        return pendStatus;
-                    }
-                    // Conceal board, time limit, player nicknames and word lists
-                    else if ((temp.GameState.Equals("active")|| temp.GameState.Equals("completed")) && "yes".Equals(brief))
-                    {
-                        game.GameState = temp.GameState;
-                        game.TimeLeft = temp.TimeLeft;
+                    game.Player2 = new Player();
+                    game.Player2.Score = temp.Player2.Score;
 
-                        game.Player1 = new Player();
-                        game.Player1.Score = temp.Player1.Score;
-
-                        game.Player2 = new Player();
-                        game.Player2.Score = temp.Player2.Score;
-
-                        return game;
-                    }
-                    // Conceal Players' word lists
-                    else if (temp.GameState.Equals("active"))
-                    {
-                        game.GameState = temp.GameState;
-                        game.Board = temp.Board;
-                        game.TimeLimit = temp.TimeLimit;
-                        game.TimeLeft = temp.TimeLeft;
-
-                        game.Player1 = new Player();
-                        game.Player1.Nickname = temp.Player1.Nickname;
-                        game.Player1.Score = temp.Player1.Score;
-
-                        game.Player2 = new Player();
-                        game.Player2.Nickname = temp.Player2.Nickname;
-                        game.Player2.Score = temp.Player2.Score;
-
-                        SetStatus(OK);
-                        return game;
-
-                    }
-                    // Display all information
-                    else if (temp.GameState.Equals("completed"))
-                    {
-                        game.GameState = temp.GameState;
-                        game.Board = temp.Board;
-                        game.TimeLimit = temp.TimeLimit;
-                        game.TimeLeft = 0;
-
-                        game.Player1 = new Player();
-                        game.Player1.Nickname = temp.Player1.Nickname;
-                        game.Player1.Score = temp.Player1.Score;
-
-                        game.Player2 = new Player();
-                        game.Player2.Nickname = temp.Player2.Nickname;
-                        game.Player2.Score = temp.Player2.Score;
-
-                        game.Player1.WordsPlayed = new List<Words>(temp.Player1.WordsPlayed);
-                        game.Player2.WordsPlayed = new List<Words>(temp.Player2.WordsPlayed); ;
-
-                        SetStatus(OK);
-                        return game;
-                    }
-
-                    return temp;
+                    return game;
                 }
+                // Conceal Players' word lists
+                else if (temp.GameState.Equals("active"))
+                {
+                    game.GameState = temp.GameState;
+                    game.Board = temp.Board;
+                    game.TimeLimit = temp.TimeLimit;
+                    game.TimeLeft = temp.TimeLeft;
+
+                    game.Player1 = new Player();
+                    game.Player1.Nickname = temp.Player1.Nickname;
+                    game.Player1.Score = temp.Player1.Score;
+
+                    game.Player2 = new Player();
+                    game.Player2.Nickname = temp.Player2.Nickname;
+                    game.Player2.Score = temp.Player2.Score;
+
+                    SetStatus(OK);
+                    return game;
+
+                }
+                // Display all information
+                else if (temp.GameState.Equals("completed"))
+                {
+                    game.GameState = temp.GameState;
+                    game.Board = temp.Board;
+                    game.TimeLimit = temp.TimeLimit;
+                    game.TimeLeft = 0;
+
+                    game.Player1 = new Player();
+                    game.Player1.Nickname = temp.Player1.Nickname;
+                    game.Player1.Score = temp.Player1.Score;
+
+                    game.Player2 = new Player();
+                    game.Player2.Nickname = temp.Player2.Nickname;
+                    game.Player2.Score = temp.Player2.Score;
+
+                    game.Player1.WordsPlayed = new List<Words>(temp.Player1.WordsPlayed);
+                    game.Player2.WordsPlayed = new List<Words>(temp.Player2.WordsPlayed); ;
+
+                    SetStatus(OK);
+                    return game;
+                }
+                return temp;
             }
         }
 

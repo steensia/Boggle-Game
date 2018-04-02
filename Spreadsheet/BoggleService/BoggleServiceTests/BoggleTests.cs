@@ -137,6 +137,11 @@ namespace Boggle
             r = client.DoPostAsync("games", temp).Result;
             Assert.AreEqual(Created, r.Status);
             Assert.AreEqual(GameID , (string)r.Data.GameID);
+
+            temp = new ExpandoObject();
+            temp.UserToken = user2.UserToken;
+            temp.Word = "try";
+
         }
 
         [TestMethod]
