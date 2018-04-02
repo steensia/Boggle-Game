@@ -27,6 +27,10 @@ namespace Boggle
         private static BoggleBoard board;
         private static string pendingGame;
 
+        static BoggleService()
+        {
+
+        }
         public BoggleService()
         {
             lock (sync)
