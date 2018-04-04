@@ -30,13 +30,6 @@ namespace Boggle
         public string GameID { get; set; }
     }
 
-    [DataContract]
-    public class GameStatusState
-    {
-        [DataMember]
-        public string GameState { get; set; }
-    }
-
     //cancel join
 
 
@@ -55,7 +48,7 @@ namespace Boggle
     //game status
 
     [DataContract]
-    public class GameStatus:GameStatusState
+    public class GameStatus
     {
         [DataMember]
         public string GameState { get; set; }

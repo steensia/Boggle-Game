@@ -276,7 +276,7 @@ namespace Boggle
         /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
         public WordScore PlayWord(WordToPlay w, string gameID)
         {
-            if (w.Word == null || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !(games.TryGetValue(gameID, out GameStatus temp) || (temp.Player1.UserToken != w.UserToken || temp.Player2.UserToken != w.UserToken)))
+            if (w.Word == null || w.Word.Equals("") || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !games.TryGetValue(gameID, out GameStatus temp) || (!w.UserToken.Equals(temp.Player1.UserToken) && !w.UserToken.Equals(temp.Player2.UserToken)))
             {
                 SetStatus(Forbidden);
                 return null;
@@ -326,7 +326,7 @@ namespace Boggle
         /// If GameID is invalid, responds with status 403 (Forbidden).
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
-        public GameStatusState GameStatus(string gameID, string brief)
+        public GameStatus GameStatus(string gameID, string brief)
         {
             if (gameID == null || !games.ContainsKey(gameID))
             {
@@ -342,9 +342,8 @@ namespace Boggle
                 // Display pending status
                 if (temp.GameState.Equals("pending"))
                 {
-                    GameStatusState pendStatus = new GameStatusState();
+                    GameStatus pendStatus = new GameStatus();
                     pendStatus.GameState = "pending";
-                    //game.GameState = "pending";
 
                     SetStatus(OK);
                     return pendStatus;
