@@ -147,7 +147,7 @@ namespace Boggle
                 {
                     using (SqlCommand command = new SqlCommand("select UserToken from Users where UserToken = @UserToken", conn, trans))
                     {
-                        command.Parameters.AddWithValue("@UsrToken", g.UserToken);
+                        command.Parameters.AddWithValue("@UserToken", g.UserToken);
 
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
