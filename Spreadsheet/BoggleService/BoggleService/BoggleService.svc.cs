@@ -221,13 +221,14 @@ namespace Boggle
             lock (sync)
             {
 
-                if (w.Word == null || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !(games.TryGetValue(gameID, out GameStatus temp) || (temp.Player1.UserToken != w.UserToken || temp.Player2.UserToken != w.UserToken)))
+                if (w.Word == null || w.Word.Equals("") || w.Word.Trim().Length > 30 || w.UserToken == null || !players.ContainsKey(w.UserToken) || gameID == null || !games.TryGetValue(gameID, out GameStatus temp) || (!w.UserToken.Equals(temp.Player1.UserToken) && !w.UserToken.Equals(temp.Player2.UserToken)))
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
                 else
                 {
+                    updateTime(gameID);
                     games.TryGetValue(gameID, out GameStatus g);
                     if (!g.GameState.Equals("active"))
                     {
@@ -236,8 +237,6 @@ namespace Boggle
                     }
                     else
                     {
-                        updateTime(gameID);
-
                         Words wordPlay = new Words();
                         wordPlay.Word = w.Word;
 
