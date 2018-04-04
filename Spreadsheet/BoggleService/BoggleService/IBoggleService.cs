@@ -60,6 +60,6 @@ namespace Boggle
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
         [WebGet(UriTemplate = "/games/{gameID}?brief={brief}")]
-        GameStatusState GameStatus(string gameID, string brief);
+        GameStatus GameStatus(string gameID, string brief);
     }
 }

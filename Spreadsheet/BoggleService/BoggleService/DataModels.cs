@@ -55,7 +55,7 @@ namespace Boggle
     //game status
 
     [DataContract]
-    public class GameStatus:GameStatusState
+    public class GameStatus
     {
         [DataMember]
         public string GameState { get; set; }
@@ -72,7 +72,7 @@ namespace Boggle
     }
 
     [DataContract]
-    public class Player
+    public class Player 
     {
         [DataMember]
         public int Score { get; set; }

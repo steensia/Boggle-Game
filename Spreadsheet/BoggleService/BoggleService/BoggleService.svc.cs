@@ -272,7 +272,7 @@ namespace Boggle
         /// If GameID is invalid, responds with status 403 (Forbidden).
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
-        public GameStatusState GameStatus(string gameID, string brief)
+        public GameStatus GameStatus(string gameID, string brief)
         {
             lock (sync)
             {
@@ -290,7 +290,7 @@ namespace Boggle
                     // Display pending status
                     if (temp.GameState.Equals("pending"))
                     {
-                        GameStatusState pendStatus = new GameStatusState();
+                        GameStatus pendStatus = new GameStatus();
                         pendStatus.GameState = "pending";
                         //game.GameState = "pending";
 
