@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringSocket", "StringSocket\StringSocket.csproj", "{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradingTester", "GradingTester\GradingTester.csproj", "{CEDE31EF-BF4D-4254-A034-9CBA633DC89E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A6307F12-51A1-4270-B5BA-8670B10F7918}"
+	ProjectSection(SolutionItems) = preProject
+		SS.dll = SS.dll
+		SS.XML = SS.XML
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEDE31EF-BF4D-4254-A034-9CBA633DC89E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDE31EF-BF4D-4254-A034-9CBA633DC89E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDE31EF-BF4D-4254-A034-9CBA633DC89E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDE31EF-BF4D-4254-A034-9CBA633DC89E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
