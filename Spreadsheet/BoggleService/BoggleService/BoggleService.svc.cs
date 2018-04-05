@@ -139,6 +139,9 @@ namespace Boggle
                 return null;
             }
 
+            GameStatus game = new GameStatus();
+            Player player = new Player();
+
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
@@ -157,6 +160,13 @@ namespace Boggle
                                 trans.Commit();
                                 return null;
                             }
+                            else
+                            {
+                                
+                                player.Nickname = (string)reader["Nickname"];
+                                player.Score = (int)reader["Nickname"];
+
+                            }
                         }
                     }
 
@@ -173,6 +183,19 @@ namespace Boggle
                                 trans.Commit();
                                 return null;
                             }
+                            else
+                            {
+                                game.Board = (string)reader["Board"];
+                                game.TimeLimit = (int)reader["TimeLimit"];
+                                game.StartTime = (DateTime)reader["StartTime"];
+                                game.GameState= (string)reader["GameState"];
+                                game.Player1.UserToken = (string)reader["Player1.UserToken"];
+                                game.Player1.Nickname = (string)reader["Player1.Nickname"];
+                                game.Player1.Score = (int)reader["Player1.Score"];
+                                game.Player2.UserToken = (string)reader["Player2.UserToken"];
+                                game.Player2.Nickname = (string)reader["Player2.Nickname"];
+                                game.Player2.Score = (int)reader["Player2.Score"];
+                            }
                         }
                     }
 
@@ -181,8 +204,7 @@ namespace Boggle
 
 
 
-                    games.TryGetValue(pendingGame, out GameStatus game);
-                    players.TryGetValue(g.UserToken, out Player player);
+                    
 
                     // Conflict if same user joins game
                     if (game.Player1 != null && g.UserToken.Equals(game.Player1.UserToken))
@@ -437,6 +459,12 @@ namespace Boggle
 
             games.Remove(gameID);
             games.Add(gameID, temp);
+        }
+
+        private Player getPlayer(string UserToken)
+        {
+
+            return null;
         }
 
         /// <summary>
