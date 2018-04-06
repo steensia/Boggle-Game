@@ -65,7 +65,7 @@ namespace Boggle
     }
 
     [DataContract]
-    public class Player
+    public class Player 
     {
         [DataMember]
         public int Score { get; set; }
