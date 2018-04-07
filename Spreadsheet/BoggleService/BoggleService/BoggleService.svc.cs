@@ -318,14 +318,6 @@ namespace Boggle
         }
 
         /// <summary>
-        /// Private helper method to generate game ID
-        /// </summary>
-        private int uniqueGameID()
-        {
-            return getPendingGame() + 1;
-        }
-
-        /// <summary>
         /// Private helper method to update the current time
         /// </summary>
         /// <param name="gameID"></param>
@@ -397,16 +389,15 @@ namespace Boggle
 
         private void addNewGame()
         {
-            int temp = uniqueGameID();
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
 
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using (SqlCommand command = new SqlCommand("insert into Games (GameID) values(@GameID)", conn, trans))
+                    using (SqlCommand command = new SqlCommand("insert into Games (Board) output inserted.GameID values(@Board)", conn, trans))
                     {
-                        command.Parameters.AddWithValue("@GameID", temp);
+                        command.Parameters.AddWithValue("@Board", DBNull.Value);
 
                         command.ExecuteNonQuery();
 
@@ -430,9 +421,7 @@ namespace Boggle
                         command.Parameters.AddWithValue("@Word",Word.Word );
                         command.Parameters.AddWithValue("@Player", Word.UserToken);
                         command.Parameters.AddWithValue("@GameID", GameID);
-                        command.Parameters.AddWithValue("@Score", Score);
-
-                        
+                        command.Parameters.AddWithValue("@Score", Score);             
 
                         command.ExecuteScalar().ToString();
 
@@ -537,7 +526,7 @@ namespace Boggle
                 u = null;
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    using (SqlCommand command = new SqlCommand("select UserToken, NickName from Users where UserToken = @UserToken", conn, trans))
+                    using (SqlCommand command = new SqlCommand("select UserToken, Nickname from Users where UserToken = @UserToken", conn, trans))
                     {
                         command.Parameters.AddWithValue("@UserToken", userToken);
 
