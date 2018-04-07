@@ -1194,6 +1194,21 @@ namespace ServerGrader
             Task.WaitAll(tasks.ToArray());
         }
 
+        // Play ten simultaneous games with correct scores
+        [TestMethod]
+        public void PlayTen()
+        {
+            AutoResetEvent resetEvent = new AutoResetEvent(false);
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < 10; i++)
+            {
+                tasks.Add(Task.Run(() => Play(resetEvent)));
+                resetEvent.WaitOne();
+            }
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
         /// <summary>
         /// Gets the status and asserts that it is as described in the parameters.
         /// </summary>
