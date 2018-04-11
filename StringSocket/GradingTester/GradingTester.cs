@@ -820,7 +820,7 @@ namespace GradingTester
         [TestMethod()]
         public void Test18()
         {
-            new Test17Class().run(4018);
+            new Test18Class().run(4018);
         }
 
         public class Test18Class
@@ -843,30 +843,37 @@ namespace GradingTester
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 4);
                     mre.WaitOne();
                     Assert.AreEqual("This", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 13);
                     mre.WaitOne();
                     Assert.AreEqual(" is α test\na", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 3);
                     mre.WaitOne();
                     Assert.AreEqual("not", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 6);
                     mre.WaitOne();
                     Assert.AreEqual("her te", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null);
                     mre.WaitOne();
                     Assert.AreEqual("st", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 10);
                     mre.WaitOne();
-                    Assert.AreEqual("One more t", line);
+                    Assert.AreEqual("one more t", line);
+                    mre.Reset();
 
                     receiver.BeginReceive((s, p) => { line = s; mre.Set(); }, null, 4);
                     mre.WaitOne();
-                    Assert.AreEqual("est", line);
+                    Assert.AreEqual("est\n", line);
+                    mre.Reset();
                 }
                 finally
                 {
