@@ -72,10 +72,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test1()
         {
-            new Test1Class().run(4001);
+            new Test1ClassReceiver().run(4001);
         }
 
-        public class Test1Class
+        public class Test1ClassReceiver
         {
             public void run(int port)
             {
@@ -106,10 +106,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test2()
         {
-            new Test2Class().run(4002);
+            new Test2ClassSender().run(4002);
         }
 
-        public class Test2Class
+        public class Test2ClassSender
         {
             public void run(int port)
             {
@@ -140,10 +140,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test3()
         {
-            new Test3Class().run(4003);
+            new Test3ClassReceiver().run(4003);
         }
 
-        public class Test3Class
+        public class Test3ClassReceiver
         {
             public void run(int port)
             {
@@ -174,10 +174,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test4()
         {
-            new Test4Class().run(4004);
+            new Test4ClassSender().run(4004);
         }
 
-        public class Test4Class
+        public class Test4ClassSender
         {
             public void run(int port)
             {
@@ -207,10 +207,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test5()
         {
-            new Test5Class().run(4005);
+            new Test5ClassReceiver().run(4005);
         }
 
-        public class Test5Class
+        public class Test5ClassReceiver
         {
             public void run(int port)
             {
@@ -244,10 +244,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test6()
         {
-            new Test6Class().run(4006);
+            new Test6ClassSender().run(4006);
         }
 
-        public class Test6Class
+        public class Test6ClassSender
         {
             public void run(int port)
             {
@@ -281,10 +281,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test7()
         {
-            new Test7Class().run(4007);
+            new Test7ClassReceiver().run(4007);
         }
 
-        public class Test7Class
+        public class Test7ClassReceiver
         {
             public void run(int port)
             {
@@ -322,10 +322,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test8()
         {
-            new Test8Class().run(4008);
+            new Test8ClassSender().run(4008);
         }
 
-        public class Test8Class
+        public class Test8ClassSender
         {
             public void run(int port)
             {
@@ -363,10 +363,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test9()
         {
-            new Test9Class().run(4009);
+            new Test9ClassReceiver().run(4009);
         }
 
-        public class Test9Class
+        public class Test9ClassReceiver
         {
             public void run(int port)
             {
@@ -411,10 +411,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test10()
         {
-            new Test10Class().run(4010);
+            new Test10ClassSender().run(4010);
         }
 
-        public class Test10Class
+        public class Test10ClassSender
         {
             public void run(int port)
             {
@@ -460,10 +460,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test11()
         {
-            new Test11Class().run(4011);
+            new Test11ClassReceiverr().run(4011);
         }
 
-        public class Test11Class
+        public class Test11ClassReceiverr
         {
             public void run(int port)
             {
@@ -510,10 +510,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test12()
         {
-            new Test12Class().run(4012);
+            new Test12ClassSender().run(4012);
         }
 
-        public class Test12Class
+        public class Test12ClassSender
         {
             public void run(int port)
             {
@@ -560,10 +560,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test13()
         {
-            new Test13Class().run(4013);
+            new Test13ClassReceiverr().run(4013);
         }
 
-        public class Test13Class
+        public class Test13ClassReceiverr
         {
             public void run(int port)
             {
@@ -627,10 +627,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test14()
         {
-            new Test14Class().run(4014);
+            new Test14ClassSender().run(4014);
         }
 
-        public class Test14Class
+        public class Test14ClassSender
         {
             public void run(int port)
             {
@@ -694,10 +694,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test15()
         {
-            new Test15Class().run(4015);
+            new Test15ClassReceiverr().run(4015);
         }
 
-        public class Test15Class
+        public class Test15ClassReceiverr
         {
             public void run(int port)
             {
@@ -739,10 +739,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test16()
         {
-            new Test16Class().run(4016);
+            new Test16ClassSender().run(4016);
         }
 
-        public class Test16Class
+        public class Test16ClassSender
         {
             public void run(int port)
             {
@@ -786,10 +786,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test17()
         {
-            new Test17Class().run(4017);
+            new Test17ClassReceiverr().run(4017);
         }
 
-        public class Test17Class
+        public class Test17ClassReceiverr
         {
             public void run(int port)
             {
@@ -820,10 +820,10 @@ namespace GradingTester
         [TestMethod()]
         public void Test18()
         {
-            new Test18Class().run(4018);
+            new Test18ClassReceiverr().run(4018);
         }
 
-        public class Test18Class
+        public class Test18ClassReceiverr
         {
             public void run(int port)
             {
