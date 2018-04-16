@@ -69,7 +69,7 @@ namespace GradingTester
         /// <summary>
         /// Tests whether StringSocket can receive a line of text
         /// </summary>
-        [TestMethod()]
+        [TestMethod()] 
         public void Test1()
         {
             new Test1Class().run(4001);
