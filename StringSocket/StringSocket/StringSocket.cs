@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CustomNetworking
 {
@@ -56,12 +57,57 @@ namespace CustomNetworking
 
     public class StringSocket : IDisposable
     {
+
+        private struct Receive
+        {
+            public ReceiveCallback callback;
+            public object payload;
+            public int length;
+
+            public Receive(ReceiveCallback callback, object payload, int length)
+            {
+                this.callback = callback;
+                this.payload = payload;
+                this.length = length;
+            }
+        }
+
+        private struct Send
+        {
+            public string s;
+            public SendCallback callback;
+            public object payload;
+
+            public Send(string s, SendCallback callback, object payload)
+            {
+                this.callback = callback;
+                this.payload = payload;
+                this.s = s;
+            }
+        }
+
+        private Queue<Receive> ReceiveQueue;
+        private Queue<Send> SendQueue;
+
         // Underlying socket
         private Socket socket;
 
         // Encoding used for sending and receiving
         private Encoding encoding;
 
+        private byte[] incomingBytes;
+        private byte[] pendingBytes;
+
+        private StringBuilder incoming;
+
+        private char[] incomingChars;
+
+        private int pendingIndex = 0;
+
+        private Decoder decoder;
+
+        private object SendLock = new object();
+        private object ReceiveLock = new object();
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -72,6 +118,16 @@ namespace CustomNetworking
         {
             socket = s;
             encoding = e;
+
+            SendQueue = new Queue<Send>();
+            pendingBytes = new byte[0];
+
+            ReceiveQueue = new Queue<Receive>();
+            incomingBytes = new byte[10000];
+            incomingChars = new char[10000];
+            incoming = new StringBuilder();
+
+            decoder = encoding.GetDecoder();
             // TODO: Complete implementation of StringSocket
         }
 
@@ -117,8 +173,45 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-            // TODO: Implement BeginSend
+            lock (SendLock)
+                SendQueue.Enqueue(new Send(s, callback, payload));
+
+            if (SendQueue.Count == 1)
+            {
+                lock (SendLock)
+                    sendMessages();
+            }
         }
+
+        private void sendMessages()
+        {
+            if (pendingIndex < pendingBytes.Length)
+            {
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, messageSent, null);
+            }
+            else if (SendQueue.Count > 0)
+            {
+                pendingIndex = 0;
+                pendingBytes = encoding.GetBytes(SendQueue.First().s);
+
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, messageSent, null);
+            }
+        }
+
+        private void messageSent(IAsyncResult result)
+        {
+            int bytesSent = socket.EndSend(result);
+
+            lock (SendLock)
+            {
+                pendingIndex += bytesSent;
+                Send send = SendQueue.Dequeue();
+
+                Task.Run(() => send.callback(true, send.payload));
+                sendMessages();
+            }
+        }
+
 
         /// <summary>
         /// We can read a string from the StringSocket by doing
@@ -160,7 +253,84 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            // TODO: Implement BeginReceive
+            lock (ReceiveLock)
+                ReceiveQueue.Enqueue(new Receive(callback, payload, length));
+
+            if (ReceiveQueue.Count == 1)
+            {
+                lock (ReceiveLock)
+                    ReceiveMessages();
+            }
+        }
+
+        private void ReceiveMessages()
+        {
+            if (incoming.Length > 0)
+            {
+                int lastNewline = -1;
+                int start = 0;
+                int length = 0;
+
+                for (int i = 0; i < incoming.Length; i++)
+                {
+                    if (ReceiveQueue.Count > 0)
+                    {
+                        length = ReceiveQueue.First().length;
+                        if ((length > 0) ? i - start == length : incoming[i] == '\n')
+                        {
+                            String line = incoming.ToString(start, i - start);
+
+                            Receive receive = ReceiveQueue.Dequeue();
+                            Task.Run(() => receive.callback(line, receive.payload));
+
+                            lastNewline = i;
+                            start = i + 1;
+                        }
+                    }
+                }
+
+                incoming.Remove(0, lastNewline+1);
+            }
+
+            if (ReceiveQueue.Count > 0)
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+
+        }
+
+        private void MessageReceived(IAsyncResult result)
+        {
+            int bytesReceived = socket.EndReceive(result);
+
+            lock (ReceiveLock)
+            {
+                int charsRead = decoder.GetChars(incomingBytes, 0, bytesReceived, incomingChars, 0, false);
+                incoming.Append(incomingChars, 0, charsRead);
+
+                int lastNewline = -1;
+                int start = 0;
+                int length = 0;
+
+                for (int i = 0; i < incoming.Length; i++)
+                {
+                    if (ReceiveQueue.Count > 0)
+                    {
+                        length = ReceiveQueue.First().length;
+                        if ((length > 0) ? i - start == length : incoming[i] == '\n')
+                        {
+                            String line = incoming.ToString(start, i - start);
+
+                            Receive receive = ReceiveQueue.Dequeue();
+                            Task.Run(() => receive.callback(line, receive.payload));
+
+                            lastNewline = i;
+                            start = i + 1;
+                        }
+                    }
+                }
+
+                incoming.Remove(0, lastNewline+1);
+                ReceiveMessages();
+            }
         }
 
         /// <summary>

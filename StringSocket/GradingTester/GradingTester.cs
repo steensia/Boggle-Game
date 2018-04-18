@@ -721,10 +721,10 @@ namespace GradingTester
                         Task.Run(
                             () => receiver.BeginReceive((s, p) => { Interlocked.Decrement(ref count); while (true) ; }, null));
                     }
-                    if (!SpinWait.SpinUntil(() => count == 0, 5000))
-                    {
-                        Assert.Fail();
-                    }
+                   if (!SpinWait.SpinUntil(() => count == 0, 5000))
+                   {
+                       Assert.Fail();
+                   }
                 }
                 finally
                 {
