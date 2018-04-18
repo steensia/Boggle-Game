@@ -267,29 +267,39 @@ namespace CustomNetworking
         {
             if (incoming.Length > 0)
             {
-                int lastNewline = -1;
+                int lastNewline = 0;
                 int start = 0;
                 int length = 0;
+                int twoByteChars = 0;
 
                 for (int i = 0; i < incoming.Length; i++)
                 {
+                    if (incoming[i] > 256) twoByteChars++;
+
                     if (ReceiveQueue.Count > 0)
                     {
                         length = ReceiveQueue.First().length;
-                        if ((length > 0) ? i - start == length : incoming[i] == '\n')
+                        if ((length > 0) ? i - start == length - twoByteChars -1 : incoming[i] == '\n')
                         {
-                            String line = incoming.ToString(start, i - start);
+                            String line;
+
+                            if (length > 0)
+                                 line = incoming.ToString(start, i - start + 1);
+                            else
+                                 line = incoming.ToString(start, i - start);
 
                             Receive receive = ReceiveQueue.Dequeue();
                             Task.Run(() => receive.callback(line, receive.payload));
 
-                            lastNewline = i;
-                            start = i + 1;
+                                start = i + 1;
+
+                            lastNewline = start;
+                            twoByteChars = 0;
                         }
                     }
                 }
 
-                incoming.Remove(0, lastNewline+1);
+                incoming.Remove(0, lastNewline);
             }
 
             if (ReceiveQueue.Count > 0)
@@ -306,29 +316,39 @@ namespace CustomNetworking
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesReceived, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
 
-                int lastNewline = -1;
+                int lastNewline = 0;
                 int start = 0;
                 int length = 0;
+                int twoByteChars = 0;
 
                 for (int i = 0; i < incoming.Length; i++)
                 {
+                    if (incoming[i] > 256) twoByteChars++;
+
                     if (ReceiveQueue.Count > 0)
                     {
                         length = ReceiveQueue.First().length;
-                        if ((length > 0) ? i - start == length : incoming[i] == '\n')
+                        if ((length > 0) ? i - start == length - twoByteChars - 1 : incoming[i] == '\n')
                         {
-                            String line = incoming.ToString(start, i - start);
+                            String line;
+
+                            if (length > 0)
+                                line = incoming.ToString(start, i - start + 1);
+                            else
+                                line = incoming.ToString(start, i - start);
 
                             Receive receive = ReceiveQueue.Dequeue();
                             Task.Run(() => receive.callback(line, receive.payload));
 
-                            lastNewline = i;
                             start = i + 1;
+
+                            lastNewline = start;
+                            twoByteChars = 0;
                         }
                     }
                 }
 
-                incoming.Remove(0, lastNewline+1);
+                incoming.Remove(0, lastNewline);
                 ReceiveMessages();
             }
         }
