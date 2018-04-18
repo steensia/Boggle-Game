@@ -6,7 +6,7 @@
     <members>
         <member name="T:CustomNetworking.SendCallback">
             <summary>
-            The type of delegate that is called when a StringSocket send has completed.
+            The type of delegate that is called when a SS send has completed.
             </summary>
         </member>
         <member name="T:CustomNetworking.ReceiveCallback">
@@ -16,33 +16,33 @@
         </member>
         <member name="T:CustomNetworking.SS">
              <summary> 
-             A StringSocket is a wrapper around a Socket.  It provides methods that
+             A SS is a wrapper around a Socket.  It provides methods that
              asynchronously read lines of text (strings terminated by newlines) and 
              write strings. (As opposed to Sockets, which read and write raw bytes.)  
             
-             StringSockets are thread safe.  This means that two or more threads may
-             invoke methods on a shared StringSocket without restriction.  The
-             StringSocket takes care of the synchronization.
+             SSs are thread safe.  This means that two or more threads may
+             invoke methods on a shared SS without restriction.  The
+             SS takes care of the synchronization.
              
-             Each StringSocket contains a Socket object that is provided by the client.  
-             A StringSocket will work properly only if the client refrains from calling
+             Each SS contains a Socket object that is provided by the client.  
+             A SS will work properly only if the client refrains from calling
              the contained Socket's read and write methods.
              
-             We can write a string to a StringSocket ss by doing
+             We can write a string to a SS ss by doing
              
                 ss.BeginSend("Hello world", callback, payload);
                 
              where callback is a SendCallback (see below) and payload is an arbitrary object.
-             This is a non-blocking, asynchronous operation.  When the StringSocket has 
+             This is a non-blocking, asynchronous operation.  When the SS has 
              successfully written the string to the underlying Socket, or failed in the 
              attempt, it invokes the callback.  The parameter to the callback is the payload.  
              
-             We can read a string from a StringSocket ss by doing
+             We can read a string from a SS ss by doing
              
                  ss.BeginReceive(callback, payload)
                  
              where callback is a ReceiveCallback (see below) and payload is an arbitrary object.
-             This is non-blocking, asynchronous operation.  When the StringSocket has read a
+             This is non-blocking, asynchronous operation.  When the SS has read a
              string of text terminated by a newline character from the underlying Socket, or
              failed in the attempt, it invokes the callback.  The parameters to the callback are
              a string and the payload.  The string is the requested string (with the newline removed).
@@ -60,30 +60,30 @@
         </member>
         <member name="M:CustomNetworking.SS.#ctor(System.Net.Sockets.Socket,System.Text.Encoding)">
             <summary>
-            Creates a StringSocket from a regular Socket, which should already be connected.  
+            Creates a SS from a regular Socket, which should already be connected.  
             The read and write methods of the regular Socket must not be called after the
-            StringSocket is created.  Otherwise, the StringSocket will not behave properly.  
+            SS is created.  Otherwise, the SS will not behave properly.  
             The encoding to use to convert between raw bytes and strings is also provided.
             </summary>
         </member>
         <member name="M:CustomNetworking.SS.Shutdown(System.Net.Sockets.SocketShutdown)">
             <summary>
-            Shuts down this StringSocket.
+            Shuts down this SS.
             </summary>
         </member>
         <member name="M:CustomNetworking.SS.Close">
             <summary>
-            Closes this StringSocket.
+            Closes this SS.
             </summary>
         </member>
         <member name="M:CustomNetworking.SS.BeginSend(System.String,CustomNetworking.SendCallback,System.Object)">
              <summary>
-             We can write a string to a StringSocket ss by doing
+             We can write a string to a SS ss by doing
              
                 ss.BeginSend("Hello world", callback, payload);
                 
              where callback is a SendCallback (see below) and payload is an arbitrary object.
-             This is a non-blocking, asynchronous operation.  When the StringSocket has 
+             This is a non-blocking, asynchronous operation.  When the SS has 
              successfully written the string to the underlying Socket it invokes the callback.  
              The parameters to the callback are true and the payload.
              
@@ -97,7 +97,7 @@
              
              This method is thread safe.  This means that multiple threads can call BeginSend
              on a shared socket without worrying around synchronization.  The implementation of
-             BeginSend must take care of synchronization instead.  On a given StringSocket, each
+             BeginSend must take care of synchronization instead.  On a given SS, each
              string arriving via a BeginSend method call must be sent (in its entirety) before
              a later arriving string can be sent.
              </summary>
@@ -119,17 +119,17 @@
         </member>
         <member name="M:CustomNetworking.SS.BeginReceive(CustomNetworking.ReceiveCallback,System.Object,System.Int32)">
              <summary>
-             We can read a string from the StringSocket by doing
+             We can read a string from the SS by doing
              
                  ss.BeginReceive(callback, payload)
                  
              where callback is a ReceiveCallback (see below) and payload is an arbitrary object.
-             This is non-blocking, asynchronous operation.  When the StringSocket has read a
+             This is non-blocking, asynchronous operation.  When the SS has read a
              string of text terminated by a newline character from the underlying Socket, it 
              invokes the callback.  The parameters to the callback are a string and the payload.  
              The string is the requested string (with the newline removed).
              
-             Alternatively, we can read a string from the StringSocket by doing
+             Alternatively, we can read a string from the SS by doing
              
                  ss.BeginReceive(callback, payload, length)
                  
@@ -147,12 +147,12 @@
              
              This method is thread safe.  This means that multiple threads can call BeginReceive
              on a shared socket without worrying around synchronization.  The implementation of
-             BeginReceive must take care of synchronization instead.  On a given StringSocket, each
+             BeginReceive must take care of synchronization instead.  On a given SS, each
              arriving line of text must be passed to callbacks in the order in which the corresponding
              BeginReceive call arrived.
              
              Note that it is possible for there to be incoming bytes arriving at the underlying Socket
-             even when there are no pending callbacks.  StringSocket implementations should refrain
+             even when there are no pending callbacks.  SS implementations should refrain
              from buffering an unbounded number of incoming bytes beyond what is required to service
              the pending callbacks.
              </summary>
@@ -175,35 +175,35 @@
         </member>
         <member name="M:CustomNetworking.SS.Dispose">
             <summary>
-            Frees resources associated with this StringSocket.
+            Frees resources associated with this SS.
             </summary>
         </member>
         <member name="T:CustomNetworking.SSClient">
             <summary>
-            Represents client connections that use StringSockets.
+            Represents client connections that use SSs.
             </summary>
         </member>
         <member name="M:CustomNetworking.SSClient.#ctor(System.String,System.Int32,System.Text.Encoding)">
             <summary>
             Creates a client communicating with the remote host via the given port
-            using the provided encoding over a StringSocket.
+            using the provided encoding over a SS.
             </summary>
         </member>
         <member name="P:CustomNetworking.SSClient.Client">
             <summary>
-            The StringSocket over which the communication occurs.
+            The SS over which the communication occurs.
             </summary>
         </member>
         <member name="T:CustomNetworking.SSCallback">
             <summary>
-            The type of delegate that is called when a StringSocketListener has
-            opened a StringSocket.
+            The type of delegate that is called when a SSListener has
+            opened a SS.
             </summary>
         </member>
         <member name="T:CustomNetworking.SSListener">
             <summary>
             A server capable of communicating with multiple remote clients over 
-            a StringSocket.
+            a SS.
             </summary>
         </member>
         <member name="F:CustomNetworking.SSListener.tcpListener">
@@ -218,15 +218,15 @@
         </member>
         <member name="M:CustomNetworking.SSListener.#ctor(System.Int32,System.Text.Encoding)">
             <summary>
-            Creates a StringSocketListener that listens for incoming connections on the
-            specified port.  Uses the provided encoding for a StringSockets that are
+            Creates a SSListener that listens for incoming connections on the
+            specified port.  Uses the provided encoding for a SSs that are
             connected.
             </summary>
         </member>
-        <member name="M:CustomNetworking.SSListener.BeginAcceptStringSocket(CustomNetworking.SSCallback,System.Object)">
+        <member name="M:CustomNetworking.SSListener.BeginAcceptSS(CustomNetworking.SSCallback,System.Object)">
             <summary>
             Begins listening asynchonously for an incoming socket reqest.  When a
-            StringSocket is established, invokes the callback wih the StringSocket
+            SS is established, invokes the callback wih the SS
             and the payload as parameters.
             </summary>
         </member>
@@ -236,9 +236,9 @@
             BeginAcceptSocket call.
             </summary>
         </member>
-        <member name="M:CustomNetworking.SSListener.AcceptStringSocket">
+        <member name="M:CustomNetworking.SSListener.AcceptSS">
             <summary>
-            Blocking call that obtains a StringSocket connection.
+            Blocking call that obtains a SS connection.
             </summary>
         </member>
         <member name="M:CustomNetworking.SSListener.Start">
