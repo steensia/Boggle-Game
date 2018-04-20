@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,21 +43,21 @@ namespace MyBoggleService
         /// an http response is sent.
         /// </summary>
         /// <param name="status"></param>
-        private static void SetStatus(HttpStatusCode status)
-        {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = status;
-        }
+        //private static void SetStatus(HttpStatusCode status)
+        //{
+        //    WebOperationContext.Current.OutgoingResponse.StatusCode = status;
+        //}
 
-        /// <summary>
-        /// Returns a Stream version of index.html.
-        /// </summary>
-        /// <returns></returns>
-        public Stream API()
-        {
-            SetStatus(OK);
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-            return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
-        }
+        ///// <summary>
+        ///// Returns a Stream version of index.html.
+        ///// </summary>
+        ///// <returns></returns>
+        //public Stream API()
+        //{
+        //    SetStatus(OK);
+        //    WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+        //    return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
+        //}
 
         /// <summary>
         /// Create a new user.
@@ -64,11 +65,11 @@ namespace MyBoggleService
         /// Otherwise, creates a new user with a unique UserToken and the trimmed Nickname. The returned UserToken should be used to identify the 
         /// user in subsequent requests. Responds with status 201 (Created).
         /// </summary>
-        public User CreateUser(Username u)
+        public User CreateUser(Username u, out HttpStatusCode SetStatus)
         {
             if (u.Nickname == null || u.Nickname.Trim().Length == 0 || u.Nickname.Trim().Length > 50)
             {
-                SetStatus(Forbidden);
+                SetStatus = HttpStatusCode.Forbidden;
                 return null;
             }
 
@@ -77,7 +78,7 @@ namespace MyBoggleService
 
             addUser(user.UserToken, u.Nickname.Trim());
 
-            SetStatus(Created);
+            SetStatus = HttpStatusCode.Created;
             return user;
         }
 
@@ -91,18 +92,18 @@ namespace MyBoggleService
         /// Otherwise, adds UserToken as the first player of the pending game, and the TimeLimit as the pending game's requested time limit. Returns the 
         /// pending game's GameID. Responds with status 202 (Accepted).
         /// </summary>
-        public GameRoom JoinGame(GameInfo g)
+        public GameRoom JoinGame(GameInfo g, out HttpStatusCode SetStatus)
         {
             if (g.UserToken == null || g.TimeLimit < 5 || g.TimeLimit > 120 || !tryGetPlayer(g.UserToken, out Player player) || !tryGetGame(getPendingGame(), out GameStatus game))
             {
-                SetStatus(Forbidden);
+                SetStatus = HttpStatusCode.Forbidden;
                 return null;
             }
 
             // Conflict if same user joins game
             if (game.Player1.UserToken != null && g.UserToken.Equals(game.Player1.UserToken))
             {
-                SetStatus(Conflict);
+                SetStatus = HttpStatusCode.Conflict;
                 return null;
             }
             else if (game.Player1.UserToken == null)
@@ -120,7 +121,7 @@ namespace MyBoggleService
 
                 updateGame(pendingGame, game);
 
-                SetStatus(Accepted);
+                SetStatus = HttpStatusCode.Accepted;
                 return room;
             }
             else
@@ -145,7 +146,7 @@ namespace MyBoggleService
                 // Create new pending game.
                 addNewGame();
 
-                SetStatus(Created);
+                SetStatus = HttpStatusCode.Created;
                 return room;
             }
         }
@@ -153,12 +154,12 @@ namespace MyBoggleService
         /// Cancel a pending request to join a game.
         /// If UserToken is invalid or is not a player in the pending game, responds with status 403 (Forbidden).
         /// Otherwise, removes UserToken from the pending game and responds with status 200 (OK).
-        public void CancelJoin(User u)
+        public void CancelJoin(User u, out HttpStatusCode SetStatus)
         {
             int pendingGame = getPendingGame();
             if (u.UserToken == null || !tryGetPlayer(u.UserToken, out Player p) || pendingGame == 0 || !tryGetGame(pendingGame, out GameStatus g) || g.Player1.UserToken == null || !u.UserToken.Equals(g.Player1.UserToken))
             {
-                SetStatus(Forbidden);
+                SetStatus = HttpStatusCode.Forbidden;
             }
             else
             {
@@ -166,7 +167,7 @@ namespace MyBoggleService
                 g.Player1.UserToken = null;
                 updateGame(pendingGame, g);
 
-                SetStatus(OK);
+                SetStatus = HttpStatusCode.OK;
             }
         }
 
@@ -176,12 +177,12 @@ namespace MyBoggleService
         /// Otherwise, if the game state is anything other than "active", responds with response code 409 (Conflict).
         /// Otherwise, records the trimmed Word as being played by UserToken in the game identified by GameID. Returns the score for Word in the context of the 
         /// game (e.g. if Word has been played before the score is zero). Responds with status 200 (OK). Note: The word is not case sensitive.
-        public WordScore PlayWord(WordToPlay w, string gameID)
+        public WordScore PlayWord(WordToPlay w, string gameID, out HttpStatusCode SetStatus)
         {
             int timeLeft;
             if (w.Word == null || w.Word.Equals("") || w.Word.Trim().Length > 30 || w.UserToken == null || !tryGetPlayer(w.UserToken, out Player p) || gameID == null || !int.TryParse(gameID, out int GameID) || !((timeLeft = getTimeLeft(GameID)) is int) || !tryGetGame(GameID, out GameStatus g) || (!w.UserToken.Equals(g.Player1.UserToken) && !w.UserToken.Equals(g.Player2.UserToken)))
             {
-                SetStatus(Forbidden);
+                SetStatus = HttpStatusCode.Forbidden;
                 return null;
             }
             else
@@ -189,7 +190,7 @@ namespace MyBoggleService
 
                 if (!g.GameState.Equals("active"))
                 {
-                    SetStatus(Conflict);
+                    SetStatus = HttpStatusCode.Conflict;
                     return null;
                 }
                 else
@@ -217,7 +218,7 @@ namespace MyBoggleService
                     // Update the players' played words
                     addWordToList(w, GameID, scoreWord.Score);
 
-                    SetStatus(OK);
+                    SetStatus = HttpStatusCode.OK;
                     return scoreWord;
                 }
             }
@@ -227,12 +228,12 @@ namespace MyBoggleService
         /// If GameID is invalid, responds with status 403 (Forbidden).
         /// Otherwise, returns information about the game named by GameID as illustrated below. Note that the information returned depends on whether "Brief=yes" 
         /// was included as a parameter as well as on the state of the game. Responds with status code 200 (OK). Note: The Board and Words are not case sensitive.
-        public GameStatus GameStatus(string gameID, string brief)
+        public GameStatus GameStatus(string gameID, string brief, out HttpStatusCode SetStatus)
         {
             int timeLeft;
             if (gameID == null || !int.TryParse(gameID, out int GameID) || !((timeLeft = getTimeLeft(GameID)) is int) || !tryGetGame(GameID, out GameStatus temp))
             {
-                SetStatus(Forbidden);
+                SetStatus = HttpStatusCode.Forbidden;
                 return null;
             }
             else
@@ -245,7 +246,7 @@ namespace MyBoggleService
                     GameStatus pendStatus = new GameStatus();
                     pendStatus.GameState = "pending";
 
-                    SetStatus(OK);
+                    SetStatus = HttpStatusCode.OK;
                     return pendStatus;
                 }
                 // Conceal board, time limit, player nicknames and word lists
@@ -260,6 +261,7 @@ namespace MyBoggleService
                     game.Player2 = new Player();
                     game.Player2.Score = getScore(temp.Player2.UserToken, GameID);
 
+                    SetStatus = HttpStatusCode.OK;
                     return game;
                 }
                 // Conceal Players' word lists
@@ -278,7 +280,7 @@ namespace MyBoggleService
                     game.Player2.Nickname = getPlayer(temp.Player2.UserToken);
                     game.Player2.Score = getScore(temp.Player2.UserToken, GameID);
 
-                    SetStatus(OK);
+                    SetStatus = HttpStatusCode.OK;
                     return game;
 
                 }
@@ -301,9 +303,10 @@ namespace MyBoggleService
                     game.Player1.WordsPlayed = getWordsPlayed(temp.Player1.UserToken, GameID);
                     game.Player2.WordsPlayed = getWordsPlayed(temp.Player2.UserToken, GameID);
 
-                    SetStatus(OK);
+                    SetStatus = HttpStatusCode.OK;
                     return game;
                 }
+                SetStatus = HttpStatusCode.OK;
                 return temp;
             }
         }
