@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBoggleService", "MyBoggleService\MyBoggleService.csproj", "{6B1B48B8-B9CD-4AE6-9683-6756FE67CB56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringSocket", "..\..\StringSocket\StringSocket\StringSocket.csproj", "{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6B1B48B8-B9CD-4AE6-9683-6756FE67CB56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B1B48B8-B9CD-4AE6-9683-6756FE67CB56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B1B48B8-B9CD-4AE6-9683-6756FE67CB56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24ABDD41-AD25-445D-B6E1-5E96E5F3326A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
