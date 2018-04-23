@@ -97,6 +97,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\StringSocket\StringSocket\StringSocket.csproj">
+      <Project>{24abdd41-ad25-445d-b6e1-5e96e5f3326a}</Project>
+      <Name>StringSocket</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BoggleService\BoggleService.csproj">
       <Project>{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}</Project>
       <Name>BoggleService</Name>
