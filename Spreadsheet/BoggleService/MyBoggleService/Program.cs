@@ -19,7 +19,7 @@ namespace MyBoggleService
             StringSocketListener server = new StringSocketListener(60000, Encoding.UTF8);
             server.Start();
             server.BeginAcceptStringSocket(ConnectionMade, server);
-            Console.ReadLine();
+            Console.ReadLine();            
         }
 
         private static void ConnectionMade(StringSocket ss, object payload)
@@ -42,7 +42,7 @@ namespace MyBoggleService
             private static readonly Regex JoinGamePattern = new Regex(@"^POST /BoggleService.svc/games HTTP");
             private static readonly Regex CancelJoinPattern = new Regex(@"^PUT /BoggleService.svc/games HTTP");
             private static readonly Regex PlayeWordPattern = new Regex(@"^PUT /BoggleService.svc/games/[0-9]* HTTP");
-            private static readonly Regex Pattern = new Regex(@"^GET /BoggleService.svc/games/[0-9]*+(/brief)? HTTP");
+            private static readonly Regex Pattern = new Regex(@"^GET /BoggleService.svc/games/[0-9]*(/brief)? HTTP");
             private static readonly Regex contentLengthPattern = new Regex(@"^content-length: (\d+)", RegexOptions.IgnoreCase);
 
             public RequestHandler(StringSocket ss)
@@ -91,7 +91,7 @@ namespace MyBoggleService
                         result += "Content-Length: " + Encoding.UTF8.GetByteCount(res) + "\r\n";
                         result += res;
                     }
-                    ss.BeginSend(result, (x, y) => { ss.Shutdown(SocketShutdown.Both); }, null);
+                    ss.BeginSend(result, (x, y) => { Console.WriteLine("Reached Callback"); } ,null);
                 }
             }
         }

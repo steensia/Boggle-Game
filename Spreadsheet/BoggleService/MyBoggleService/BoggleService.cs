@@ -19,8 +19,17 @@ namespace MyBoggleService
 
         static BoggleService()
         {
-            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+            string dbFolder = System.IO.Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+            string connectionString = String.Format(@"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = {0}\BoggleDB.mdf; Integrated Security = True", dbFolder);
+            BoggleDB = connectionString;
+            
         }
+
+        internal User MakeUser(Username name, out HttpStatusCode status)
+        {
+            throw new NotImplementedException();
+        }
+
         public BoggleService()
         {
             if (validWords == null)
