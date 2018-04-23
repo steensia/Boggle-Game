@@ -46,6 +46,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>MyBoggleService.RequestHandler</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -100,10 +103,6 @@
     <ProjectReference Include="..\..\..\StringSocket\StringSocket\StringSocket.csproj">
       <Project>{24abdd41-ad25-445d-b6e1-5e96e5f3326a}</Project>
       <Name>StringSocket</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BoggleService\BoggleService.csproj">
-      <Project>{27879B14-6F92-4FD5-B48E-723C9F6EE7B7}</Project>
-      <Name>BoggleService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

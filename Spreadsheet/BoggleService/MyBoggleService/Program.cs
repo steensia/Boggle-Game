@@ -12,81 +12,87 @@ using System.Threading.Tasks;
 
 namespace MyBoggleService
 {
-    class RequestHandler
+    public class MyServer
     {
-        static void Main(string[] args)
+        public static void Main ()
         {
-            HttpStatusCode status;
-            
-            Username name = new Username { Nickname = "Joe" };
-            BoggleService service = new BoggleService();
-            User user = service.CreateUser(name, out status);
-            Console.WriteLine(user.UserToken);
-            Console.WriteLine(status.ToString());
-
-            // This is our way of preventing the main thread from
-            // exiting while the server is in use
+            StringSocketListener server = new StringSocketListener(60000, Encoding.UTF8);
+            server.Start();
+            server.BeginAcceptStringSocket(ConnectionMade, server);
             Console.ReadLine();
         }
 
-        // Copy Pasted Code
-        private StringSocket ss;
-
-        private string firstLine;
-        private int contentLength;
-        private static readonly Regex CreateUserPattern = new Regex(@"^POST /BoggleService.svc/users HTTP");
-        private static readonly Regex JoinGamePattern = new Regex(@"^POST /BoggleService.svc/games HTTP");
-        private static readonly Regex CancelJoinPattern = new Regex(@"^PUT /BoggleService.svc/games HTTP");
-        private static readonly Regex PlayeWordPattern = new Regex(@"^PUT /BoggleService.svc/games/[0-9]* HTTP");
-        private static readonly Regex Pattern = new Regex(@"^GET /BoggleService.svc/games/[0-9]*+(/brief)? HTTP");
-        private static readonly Regex contentLengthPattern = new Regex(@"^content-length: (\d+)", RegexOptions.IgnoreCase);
-
-        public RequestHandler(StringSocket ss)
+        private static void ConnectionMade(StringSocket ss, object payload)
         {
-            this.ss = ss;
-            contentLength = 0;
-            ss.BeginReceive(ReadLines, null);
+            StringSocketListener server = (StringSocketListener)payload;
+            server.BeginAcceptStringSocket(ConnectionMade, server);
+            new RequestHandler(ss);
         }
 
-        private void ReadLines(string line, object p)
+        private class RequestHandler
         {
-            if (line.Trim().Length == 0 && contentLength > 0)
+
+
+            // Copy Pasted Code
+            private StringSocket ss;
+
+            private string firstLine;
+            private int contentLength;
+            private static readonly Regex CreateUserPattern = new Regex(@"^POST /BoggleService.svc/users HTTP");
+            private static readonly Regex JoinGamePattern = new Regex(@"^POST /BoggleService.svc/games HTTP");
+            private static readonly Regex CancelJoinPattern = new Regex(@"^PUT /BoggleService.svc/games HTTP");
+            private static readonly Regex PlayeWordPattern = new Regex(@"^PUT /BoggleService.svc/games/[0-9]* HTTP");
+            private static readonly Regex Pattern = new Regex(@"^GET /BoggleService.svc/games/[0-9]*+(/brief)? HTTP");
+            private static readonly Regex contentLengthPattern = new Regex(@"^content-length: (\d+)", RegexOptions.IgnoreCase);
+
+            public RequestHandler(StringSocket ss)
             {
-                ss.BeginReceive(ProcessRequest, null, contentLength);
-            }
-            else if (line.Trim().Length == 0)
-            {
-                ProcessRequest(null);
-            }
-            else if (firstLine != null)
-            {
-                Match m = contentLengthPattern.Match(line);
-                if (m.Success)
-                {
-                    contentLength = int.Parse(m.Groups[1].ToString());
-                }
+                this.ss = ss;
+                contentLength = 0;
                 ss.BeginReceive(ReadLines, null);
             }
-            else
+
+
+            private void ReadLines(string line, object p)
             {
-                firstLine = line;
-                ss.BeginReceive(ReadLines, null);
-            }
-        }
-        private void ProcessRequest(string line, object p = null)
-        {
-            if (CreateUserPattern.IsMatch(firstLine))
-            {
-                Username n = JsonConvert.DeserializeObject<Username>(line);
-                User user = new BoggleService().CreateUser(n, out HttpStatusCode status);
-                String result = "HTTP/1.1 " + (int)status + " " + status + "\r\n";
-                if ((int)status / 100 == 2)
+                if (line.Trim().Length == 0 && contentLength > 0)
                 {
-                    string res = JsonConvert.SerializeObject(user);
-                    result += "Content-Length: " + Encoding.UTF8.GetByteCount(res) + "\r\n";
-                    result += res;
+                    ss.BeginReceive(ProcessRequest, null, contentLength);
                 }
-                ss.BeginSend(result, (x, y) => { ss.Shutdown(SocketShutdown.Both); }, null);
+                else if (line.Trim().Length == 0)
+                {
+                    ProcessRequest(null);
+                }
+                else if (firstLine != null)
+                {
+                    Match m = contentLengthPattern.Match(line);
+                    if (m.Success)
+                    {
+                        contentLength = int.Parse(m.Groups[1].ToString());
+                    }
+                    ss.BeginReceive(ReadLines, null);
+                }
+                else
+                {
+                    firstLine = line;
+                    ss.BeginReceive(ReadLines, null);
+                }
+            }
+            private void ProcessRequest(string line, object p = null)
+            {
+                if (CreateUserPattern.IsMatch(firstLine))
+                {
+                    Username n = JsonConvert.DeserializeObject<Username>(line);
+                    User user = new BoggleService().CreateUser(n, out HttpStatusCode status);
+                    String result = "HTTP/1.1 " + (int)status + " " + status + "\r\n";
+                    if ((int)status / 100 == 2)
+                    {
+                        string res = JsonConvert.SerializeObject(user);
+                        result += "Content-Length: " + Encoding.UTF8.GetByteCount(res) + "\r\n";
+                        result += res;
+                    }
+                    ss.BeginSend(result, (x, y) => { ss.Shutdown(SocketShutdown.Both); }, null);
+                }
             }
         }
     }
