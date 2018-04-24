@@ -31,9 +31,6 @@ namespace MyBoggleService
 
         private class RequestHandler
         {
-
-
-            // Copy Pasted Code
             private StringSocket ss;
 
             private string firstLine;
